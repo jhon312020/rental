@@ -4,6 +4,12 @@ namespace App\Repositories;
 
 use App\Rents;
 
+use App\ElectricityBill;
+
+use App\Incomes;
+
+use App\Rooms;
+
 
 class RentsRepository
 {
@@ -63,17 +69,265 @@ class RentsRepository
         return Rents::find($id)->delete();
     }
     /**
-     * Get all active instance of Guests.
+     * Get all active instance of Rents.
      *
      * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
      */
     public function allActive()
     {
-        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance')
+        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', \DB::raw('SUM(tbl_incomes.amount) as advance'))
                     ->join('users', 'users.id', '=', 'rents.user_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
                     ->join('incomes', 'incomes.rent_id', '=', 'rents.id', 'left')
-                    ->where(array('rents.is_active' => 1))
+                    ->where(array('rents.is_active' => 1, 'rents.checkout_date' => null))
+                    ->groupBy('rents.room_id')
                     ->get();
     }
+    /**
+     * Get all active users of Rents.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function activeUsers ($month)
+    {
+
+        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as rental_amount', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no')
+                    ->join('users', 'users.id', '=', 'rents.user_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->leftjoin('incomes', function($join) use($month)
+                     {
+                         $join->on('incomes.rent_id', '=', 'rents.id')
+                            ->on('incomes.income_type', '=', \DB::raw(\Config::get('constants.RENT')))
+                            ->on(\DB::raw('MONTH(tbl_incomes.date_of_income)'), '=', \DB::raw($month));
+
+                     })
+                    ->where(array('rents.is_active' => 1, 'rents.checkout_date' => null))
+                    ->get();
+    }
+
+    /**
+     * Get all active users of Rents.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getGuestDetailsForRoom ($data)
+    {
+
+        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no', 'rents.id as rent_id', 'guests.id as guest_id', 'rents.is_incharge')
+                    ->join('users', 'users.id', '=', 'rents.user_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->leftjoin('incomes', function($join) 
+                     {
+                         $join->on('incomes.rent_id', '=', 'rents.id')
+                            ->on('incomes.income_type', '=', \DB::raw(\Config::get('constants.ADVANCE')));
+
+                     })
+                    ->where(array('rents.is_active' => 1, 'rents.checkout_date' => null, 'rents.room_id' => $data['room_id']))
+                    ->orderBy('rents.id', 'desc')
+                    ->get();
+    }
+
+    /**
+     * Get all rent incomes for monthly.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function activeRentsIncome ($month, $year)
+    {
+      $last_day = date('t', strtotime(date($year.'-'.$month.'-01')));
+
+      if($month == date('m') && $year == date('Y')) {
+        $last_day = date('d');
+      }
+
+      $date = $year.'-'.$month.'-'.$last_day;
+
+      $first_date = $year.'-'.$month.'-01';
+
+        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+          \DB::raw('
+              IF(tbl_rents.checkout_date is null, 
+                IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                    DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date), DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))),
+                IF(MONTH(tbl_rents.checkout_date) = "'.$month.'" AND YEAR(tbl_rents.checkout_date) = "'.$year.'", 
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                        DATEDIFF(tbl_rents.checkout_date, tbl_rents.checkin_date), DATEDIFF(tbl_rents.checkout_date, DATE("'.$first_date.'"))),
+
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                      DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
+                      DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
+
+                    as no_of_days_stayed'))
+
+                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->where(array('incomes.is_active' => 1, 'incomes.income_type' => \Config::get('constants.RENT')))
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
+                    ->get();
+    }
+
+    /**
+     * Get all deleted rent incomes for monthly.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function inActiveRentsIncome ($month, $year)
+    {
+        $last_day = date('t', strtotime(date($year.'-'.$month.'-01')));
+
+        if($month == date('m') && $year == date('Y')) {
+          $last_day = date('d');
+        }
+
+        $date = $year.'-'.$month.'-'.$last_day;
+
+        $first_date = $year.'-'.$month.'-01';
+
+        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date')
+          , 
+          \DB::raw('
+              IF(tbl_rents.checkout_date is null, 
+                IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                    DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date), DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))),
+                IF(MONTH(tbl_rents.checkout_date) = "'.$month.'" AND YEAR(tbl_rents.checkout_date) = "'.$year.'", 
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                        DATEDIFF(tbl_rents.checkout_date, tbl_rents.checkin_date), DATEDIFF(tbl_rents.checkout_date, DATE("'.$first_date.'"))),
+
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                      DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
+                      DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
+
+                    as no_of_days_stayed'))
+
+                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->where(array('incomes.is_active' => 0, 'incomes.income_type' => \Config::get('constants.RENT')))
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
+                    ->get();
+    }
+
+    /**
+     * Get all filled rooms.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getVacantRooms ($start_date, $end_date)
+    {
+        $month = date('m', strtotime($start_date));
+        $year = date('Y', strtotime($start_date));
+        $income_type = \Config::get('constants.RENT');
+        return \DB::select(\DB::raw("SELECT rooms.room_no, COUNT(rent.id) as no_of_person_stayed, rooms.max_persons_allowed, rooms.total_rent_amount, IF(COUNT(rent.id) > 0, SUM(income.amount), 0) as rent_amount_get FROM tbl_rooms rooms left join tbl_rents rent on rent.room_id = rooms.id and ('$start_date' >= DATE(rent.checkin_date) or rent.checkin_date between '$start_date' and '$end_date') and IF(rent.checkout_date is null, true, '$end_date' <= rent.checkout_date) left join tbl_incomes income on income.rent_id = rent.id and income.income_type = '$income_type' and MONTH(income.date_of_income) = '$month' and YEAR(date_of_income) = '$year' where rooms.is_active = 1 group by rent.room_id, rooms.id having no_of_person_stayed = 0"));
+    }
+
+    /**
+     * Get all non filled rooms.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getNonVacantRooms ($start_date, $end_date)
+    {
+      $month = date('m', strtotime($start_date));
+      $year = date('Y', strtotime($start_date));
+        $income_type = \Config::get('constants.RENT');
+        return \DB::select(\DB::raw("SELECT rooms.room_no, rooms.max_persons_allowed, rooms.total_rent_amount, IF(COUNT(rent.id) > 0, SUM(income.amount), 0) as rent_amount_get, COUNT(rent.id) as no_of_person_stayed FROM tbl_rooms rooms left join tbl_rents rent on rent.room_id = rooms.id and ('$start_date' >= DATE(rent.checkin_date) or rent.checkin_date between '$start_date' and '$end_date') and IF(rent.checkout_date is null, true, '$end_date' <= rent.checkout_date) left join tbl_incomes income on income.rent_id = rent.id and income.income_type = '$income_type' and MONTH(income.date_of_income) = '$month' and YEAR(date_of_income) = '$year' where rooms.is_active = 1 group by rent.room_id, rooms.id having  no_of_person_stayed > 0"));
+    }
+
+    /**
+     * Get all filled and non filled rooms.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getAllRooms ($start_date, $end_date)
+    {
+      $month = date('m', strtotime($start_date));
+      $year = date('Y', strtotime($start_date));
+        $income_type = \Config::get('constants.RENT');
+        return \DB::select(\DB::raw("SELECT rooms.room_no, rooms.max_persons_allowed, rooms.total_rent_amount, IF(COUNT(rent.id) > 0, SUM(income.amount), 0) as rent_amount_get, COUNT(rent.id) as no_of_person_stayed FROM tbl_rooms rooms left join tbl_rents rent on rent.room_id = rooms.id and ('$start_date' >= DATE(rent.checkin_date) or rent.checkin_date between '$start_date' and '$end_date') and IF(rent.checkout_date is null, true, '$end_date' <= rent.checkout_date) left join tbl_incomes income on income.rent_id = rent.id and income.income_type = '$income_type' and MONTH(income.date_of_income) = '$month' and YEAR(date_of_income) = '$year' where rooms.is_active = 1 group by rent.room_id, rooms.id"));
+    }
+
+    /**
+     * Get all filled rooms.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getGuestsRentPaid ($month, $year)
+    {
+      $last_day = date('t', strtotime(date($year.'-'.$month.'-01')));
+
+      if($month == date('m') && $year == date('Y')) {
+        $last_day = date('d');
+      }
+
+      $date = $year.'-'.$month.'-'.$last_day;
+
+      $first_date = $year.'-'.$month.'-01';
+
+        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+          \DB::raw('
+              IF(tbl_rents.checkout_date is null, 
+                IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                    DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date), DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))),
+                IF(MONTH(tbl_rents.checkout_date) = "'.$month.'" AND YEAR(tbl_rents.checkout_date) = "'.$year.'", 
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                        DATEDIFF(tbl_rents.checkout_date, tbl_rents.checkin_date), DATEDIFF(tbl_rents.checkout_date, DATE("'.$first_date.'"))),
+
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                      DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
+                      DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
+
+                    as no_of_days_stayed'))
+
+                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->where(array('incomes.is_active' => 1, 'incomes.rent_amount_received' => 1, 'incomes.income_type' => \Config::get('constants.RENT')))
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
+                    ->get();
+    }
+
+    /**
+     * Get all non filled rooms.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getGuestsRentsUnPaid ($month, $year)
+    {
+      $last_day = date('t', strtotime(date($year.'-'.$month.'-01')));
+
+      if($month == date('m') && $year == date('Y')) {
+        $last_day = date('d');
+      }
+
+      $date = $year.'-'.$month.'-'.$last_day;
+
+      $first_date = $year.'-'.$month.'-01';
+
+        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+          \DB::raw('
+              IF(tbl_rents.checkout_date is null, 
+                IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                    DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date), DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))),
+                IF(MONTH(tbl_rents.checkout_date) = "'.$month.'" AND YEAR(tbl_rents.checkout_date) = "'.$year.'", 
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                        DATEDIFF(tbl_rents.checkout_date, tbl_rents.checkin_date), DATEDIFF(tbl_rents.checkout_date, DATE("'.$first_date.'"))),
+
+                    IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
+                      DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
+                      DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
+
+                    as no_of_days_stayed'))
+
+                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
+                    ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
+                    ->where(array('incomes.is_active' => 1, 'incomes.rent_amount_received' => 0, 'incomes.income_type' => \Config::get('constants.RENT')))
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
+                    ->get();
+    }
+
+   
 }

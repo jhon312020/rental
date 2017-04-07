@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title> Rent - @yield('htmlheader_title', 'Rent') </title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <!-- Bootstrap 3.3.4 -->
     <link href="{{ asset('/css/bootstrap.css') }}" rel="stylesheet" type="text/css" />
@@ -40,13 +41,57 @@
     <!-- Select2 css -->
     <link href="{{ asset('/plugins/select2/select2.min.css') }}" rel="stylesheet" type="text/css" />
 
-    <!-- AdminLte css -->
+    <!-- Select2 css -->
     <link href="{{ asset('/plugins/select2/select2.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Autocomplete css -->
+    <link href="{{ asset('/plugins/autocomplete/css/autocomplete.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Autocomplete css -->
+    <link href="{{ asset('/css/grid.css') }}" rel="stylesheet" type="text/css" />
 
     <!-- Theme style -->
     <link href="{{ asset('/css/AdminLTE.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="{{ asset('/plugins/iCheck/all.css') }}">
+
+  <!-- Toast -->
+  <link rel="stylesheet" href="{{ asset('/plugins/toast/css/jquery.toast.css') }}">
+
+  <!-- Date range picker css -->
+  <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker-bs3.css') }}">
+  <!-- jQuery 2.1.4 -->
+    <script src="{{ asset('/plugins/jQuery/jquery-1.12.4.js') }}"></script>
     <script>
     var ASSETS_PATH = "{{ asset('img') }}";
+    </script>
+    <script type="text/javascript">
+      $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      var APP_URL = {!! json_encode(url('/')) !!}
+      var ajax_url = { 
+              rent_serach : "{{action('GuestsController@getGuestByKey')}}",
+              bill_create : "{{action('AjaxController@createNewBill')}}",
+              rent_create : "{{action('AjaxController@createNewRentIncome')}}",
+              get_guest_rent : "{{action('AjaxController@getGuestDetailsForRoom')}}",
+              update_electric_bill : "{{action('AjaxController@updateElectricityBillByKey')}}",
+              remove_electric_bill : "{{action('AjaxController@deleteBillsByIds')}}",
+              update_rent_income : "{{action('AjaxController@updateRoomRentByKey')}}",
+              remove_rent_income : "{{action('AjaxController@deleteRentIncomesByIds')}}",
+              rent_update : "{{action('AjaxController@updateRent')}}",
+              move_to_active_electric_bill : "{{action('AjaxController@moveToActiveElectricBills')}}", 
+              move_to_active_rent : "{{action('AjaxController@moveToActiveRents')}}",
+              new_rent_by_room_id :  "{{action('AjaxController@addNewRentByRoom')}}",
+              get_room_report :  "{{action('AjaxController@roomReport')}}",
+              get_rent_report :  "{{action('AjaxController@rentReport')}}",
+              get_income_report :  "{{action('AjaxController@incomeReport')}}",
+              get_income_report_month :  "{{action('AjaxController@incomeReportMonth')}}",
+              get_income_report_year :  "{{action('AjaxController@incomeReportYear')}}",
+          };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

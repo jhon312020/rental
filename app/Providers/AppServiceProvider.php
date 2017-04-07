@@ -6,7 +6,11 @@ use Illuminate\Support\ServiceProvider;
 
 use App\Repositories\SettingsRepository;
 
+use App\Repositories\MenusRepository;
+
 use App\Settings;
+
+use App\Menus;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,10 +22,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         \View::composer('*', function($view) {
-            $setting_repo = new SettingsRepository();
-            $setting = $setting_repo->all()->lists('setting_value', 'setting_key')->toArray();
-            //print_r($setting);
-            $view->with('setting', $setting);
+            
+            //print_r('bright');die;
+            if(\Auth::User()) {
+                $setting_repo = new SettingsRepository();
+                $menu_repo = new MenusRepository();
+                $setting = $setting_repo->all()->lists('setting_value', 'setting_key')->toArray();
+                $roles = \Auth::User()->roles;
+                if($roles->role_name == 'admin') {
+                    $menus = $menu_repo->allActive()->toArray();
+                } else {
+
+                }
+                //print_r($setting);die;
+                $view->with(['setting' => $setting, 'menus' => $menus]);
+            }
+            
+            
         });
     }
 
@@ -30,10 +47,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
-		if ($this->app->environment() == 'local') {
-			$this->app->register(\VTalbot\RepositoryGenerator\RepositoryGeneratorServiceProvider::class);
-		}
+    public function register() {
+  		if ($this->app->environment() == 'local') {
+  			$this->app->register(\VTalbot\RepositoryGenerator\RepositoryGeneratorServiceProvider::class);
+  		}
     }
 }

@@ -38,8 +38,20 @@
 
             <li class="header">{{ trans('adminlte_lang::message.header') }}</li>
             <!-- Optionally, you can add icons to the links -->
-            @foreach(config('constants.MENUS') as $url => $menu)
-                <li class="@if(isset($page_name_active) && $page_name_active==$menu)active @endif"><a href="{{ url($url) }}"><i class="fa fa-{{config('constants.MENU_LINK')[$url]}}"></i> <span>{{ $menu }}</span></a></li>
+            <?php
+                $parent_menus = 
+                    array_filter($menus, function($value) {
+                        return $value['parent_id'] == 0;
+                    });
+            ?>
+            @foreach($parent_menus as $menu_lists)
+                @if(!$menu_lists['is_child'])
+                <li class="@if(isset($page_name_active) && $page_name_active==$menu_lists['menu_name'])active @endif">
+                    <a href="{{ url($menu_lists['menu_link']) }}"><i class="fa fa-{{$menu_lists['menu_icon']}}"></i> <span>{{ $menu_lists['menu_name'] }}</span></a>
+                </li>
+                @else
+                <?php echo Helper::getSubmenus($menu_lists, $menus); ?>
+                @endif
             @endforeach
             <!--<li><a href="#"><i class='fa fa-link'></i> <span>{{ trans('adminlte_lang::message.anotherlink') }}</span></a></li>
             <li class="treeview">

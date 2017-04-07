@@ -85,11 +85,20 @@ return [
         'rent_details' => 'Rent details',
         'guest_details' => 'Guest details',
         'add_another_guest' => 'Add another guest',
+        'rent_monthly' => 'Monthwise rent',
+        'rent_monthly_report' => 'Monthwise rent report',
+        'electric_bill_details_month' => 'Monthwise electric bill details',
+        'room_rent_details_month' => 'Monthwise room rent details',
         /* Rent page end */
 
         /* Setting page */
         'setting_update' => 'Setting update',
         /* Setting page end */
+
+        /* Report page */
+        'rent_report' => 'Rent report',
+        'room_report' => 'Room report',
+        /* Report page end */
 
     /* page title end */
 
@@ -160,6 +169,7 @@ return [
         'notes' => 'Notes',
         'entry_by' => 'Entry by',
         'date_of_income' => 'Date of income',
+        'rent_amount_received' => 'Rent amount received',
         /* income label end */
 
         /* income type label start */
@@ -176,6 +186,8 @@ return [
         'max_persons_allowed' => 'Maximum person allowed',
         'rent_amount_person' => 'Rent amount per person',
         'total_rent_amount' => 'Total rent amount',
+        'no_of_person_stayed' => 'No of person stayed',
+        'rent_amount_get' => 'Rent amount get',
         /* Room label end */
 
         /* Guests label start */
@@ -203,6 +215,9 @@ return [
         'advance' => 'Advance',
         'checkin_date' => 'Checkin date',
         'checkout_date' => 'Checkout date',
+        'search_by' => 'Search by',
+        'search_value' => 'Search value',
+        'guest_search' => 'Guest search',
         /* Rent label end */
 
         /* Setting label start */

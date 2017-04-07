@@ -23,11 +23,20 @@ return array(
                         'settings' => 'cogs',
                         'rents' => 'home',
     					),
+    'SEARCH_KEY' => array(
+                        'email',
+                        'mobile_no',
+                        'city',
+                        'state',
+                        'name',
+                        ),
 
     /*
         This is the default advance id from the table income types.
         If we clear or change the value then you should update these content too.
     */
     'ADVANCE' => 1,
+    'RENT' => 2,
     'INCOME_EDIT' => ['1'],
+    'EXPENSE_EDIT' => ['1'],
 );

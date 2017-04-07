@@ -25,7 +25,7 @@
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="table-responsive">
-									<table class="table table-striped table-bordered datatable">
+									<table class="table table-striped table-bordered datatable rent_table">
 										<thead>
 											<tr>
 												<td>{{trans('message.room_no')}}</td>
@@ -37,7 +37,7 @@
 										</thead>
 										<tbody>
 											@foreach($rents as $key => $value)
-												<tr>
+												<tr data-toggle="tooltip" data-title="Click row to view guest details" data-room-id="{{ $value->room_id }}" class="details-row">
 													<td>{{ $value->room_no }}</td>
 													<td>{{ $value->checkin_date }}</td>
 													<td>{{ $value->checkout_date }}</td>
@@ -51,10 +51,10 @@
 
 													<!-- show the nerd (uses the show method found at GET /nerds/{id} -->
 													<!--<a class="btn btn-small btn-success" href="{{ URL::to('guests/' . $value->id) }}">Show this Nerd</a>-->
-													<a href="{{ URL::to('rents/' . $value->id . '/edit') }}" class="btn btn-info btn-sm">
+													<a href="{{ URL::to('rents/' . $value->room_id . '/rent-edit') }}" class="btn btn-info btn-sm">
 														<span class="glyphicon glyphicon-edit"></span>
 													</a>
-													<a href="javascript:;" data-href="{{ URL::to('rents/' . $value->id . '/destroy') }}" class="btn btn-danger btn-sm jsDelete">
+													<a href="javascript:;" data-href="{{ URL::to('rents/' . $value->room_id . '/room-destroy') }}" class="btn btn-danger btn-sm jsDelete">
 														<span class="glyphicon glyphicon-trash"></span>
 													</a>
 													<!-- edit this nerd (uses the edit method found at GET /nerds/{id}/edit -->

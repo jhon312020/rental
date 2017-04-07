@@ -71,4 +71,14 @@ class RoomsRepository
     {
         return Rooms::where(array('is_active' => 1))->get();
     }
+
+    /**
+     * Get active room by id.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rooms[]
+     */
+    public function getActiveRoomById($id)
+    {
+        return Rooms::where(array('is_active' => 1, 'id' => $id))->first();
+    }
 }

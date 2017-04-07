@@ -129,4 +129,23 @@ class GuestsController extends Controller
        \Session::flash('message', trans('message.guests_remove_success'));
        return \Redirect::to('guests');
     }
+    /**
+     * Return the guest deatils using search key value.
+     *
+     * @param  string  $search_key
+     * @param  string  $search_value
+     * @return Response Array
+     *    
+     */
+    public function getGuestByKey()
+    {
+       $result = array(array('label' => 'test', 'value' => 'data'));
+       $countries = [
+           [ 'value' =>  'Andorra', 'data' => 'AD' ],
+           // ...
+           [ 'value' => 'Zimbabwe', 'data' => 'ZZ' ]
+        ];
+
+       return response()->json(['suggestions' => $countries]);
+    }
 }

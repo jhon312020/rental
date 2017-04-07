@@ -87,4 +87,32 @@ class Incomes extends Model
     public function setDateOfIncomeAttribute($value) {
     	$this->attributes['date_of_income'] = $value ? date('Y-m-d', strtotime(str_replace('/', '-', $value))) : null;
     }
+
+    /**
+     * Delete incomes by ids
+     * @params
+     * 		$ids - income ids Array
+     * @return 
+     *		
+     */
+    public function deleteByIds ($ids) {
+
+    	$this->whereIn('id', $ids)->update([ 'is_active' => 0 ]);
+
+    	return [ 'success' => true ];
+    }
+
+    /**
+     * Move the deleted incomes to active
+     * @params
+     *      $ids - income ids Array
+     * @return 
+     *      
+     */
+    public function updateActiveByIds ($ids) {
+
+        $this->whereIn('id', $ids)->update([ 'is_active' => 1 ]);
+
+        return [ 'success' => true ];
+    }
 }

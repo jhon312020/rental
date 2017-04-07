@@ -1,13 +1,3 @@
-<?php 
-	if(count($errors)) {
-		$old_input = session()->getOldInput();
-		$form_data = isset($old_input['guest']) ? $old_input['guest'] : [];
-	} else {
-		$form_data = [];
-	}
-	//echo old('guest.1.name');die;
-	//print_r($form_data);die;
-?>
 @extends('layouts.app')
 
 @section('htmlheader_title')
@@ -17,23 +7,7 @@
 @section('contentheader_title')
 	{{trans('message.rent_create')}}
 @endsection
-<style type="text/css">
-#guestTable .select2-container {
-	left : 20px;
-}
-#guestTable .select2-container:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  width: 0px;
-  top: 1px;
-  height: 30px;
-  border-radius: 50%;
-  border-right: 1px solid #DDD;
-  border-left: 1px solid #fafafa;
-  margin-left: 165px;
-}
-</style>
+
 @section('main-content')
 	<div class="content spark-screen">
 		<div class="row">
@@ -42,6 +16,7 @@
 					<div class="panel-heading">{{trans('message.rent_create')}}</div>
 					<div class="panel-body">
 						<div class="col-sm-12">
+							<div id="test"></div>
 							<!-- if there are creation errors, they will show here-->
 							{{ HTML::ul($errors->all()) }}
 							{{ Form::open(array('url' => 'rents')) }}
@@ -63,13 +38,15 @@
 								                  <small class="help-block">{{ $errors->first('rent.room_id') }}</small>
 								                  @endif
 								               </div>
-								               <!--<div class="col-sm-6 {{ $errors->has('rent.advance')? 'has-error': '' }}">
+								               <div class="col-sm-6 {{ $errors->has('rent.advance')? 'has-error': '' }}">
 								                  {{ Form::label('rent[advance]', trans('message.advance')) }}
 								                  {{ Form::text('rent[advance]', old('rent.advance'), array('class' => 'form-control')) }}
 								                  @if ($errors->has('rent.advance'))
 								                  <small class="help-block">{{ $errors->first('rent.advance') }}</small>
 								                  @endif
-								               </div>-->
+								               </div>
+								            </div>
+								            <div class="row form-top">
 								               <div class="col-sm-6 {{ $errors->has('rent.checkin_date')? 'has-error': '' }}">
 								                  {{ Form::label('rent[checkin_date]', trans('message.checkin_date')) }}
 								                  {{ Form::text('rent[checkin_date]', old('rent.checkin_date'), array('class' => 'form-control datepicker')) }}
@@ -77,9 +54,6 @@
 								                  <small class="help-block">{{ $errors->first('rent.checkin_date') }}</small>
 								                  @endif
 								               </div>
-								            </div>
-								            <div class="row form-top">
-								               
 								               <div class="col-sm-6 {{ $errors->has('rent.checkout_date')? 'has-error': '' }}">
 								                  {{ Form::label('rent[checkout_date]', trans('message.checkout_date')) }}
 								                  {{ Form::text('rent[checkout_date]', old('rent.checkout_date'), array('class' => 'form-control datepicker')) }}
@@ -101,43 +75,93 @@
 								   <div id="collapse2" class="panel-collapse collapse in">
 								      <div class="panel-body">
 								         <div class="row">
-								         		<div class="col-sm-12">
-								         			<ul>
-								         				<?php
-								         					$mobile = false;
-								         					$email = false;
-								         					$name = false;
-								         				?>
-								         			@foreach($errors->getMessages() as $key => $error)
-								         				<?php
-								         					if(preg_match('/guest.\d+.mobile_no/', $key) && !$mobile) {
-								         						$mobile = true;
-								         						echo "<li>" . $errors->first($key) . "</li>";
-								         					}
-								         					if(preg_match('/guest.\d+.email/', $key) && !$email) {
-								         						$email = true;
-								         						echo "<li>" . $errors->first($key) . "</li>";
-								         					}
-								         					if(preg_match('/guest.\d+.name/', $key) && !$name) {
-								         						$name = true;
-								         						echo "<li>" . $errors->first($key) . "</li>";
-								         					}
-								         				?>
-								         			@endforeach
-								         			@if ($errors->has('email'))
-							         					<li>{{ $errors->first('email') }}</li>
-							         				@endif
-							         				@if ($errors->has('mobile_no'))
-							         					<li>{{ $errors->first('mobile_no') }}</li>
-							         				@endif
-								         			</ul>
-								         		</div>
+								            <div class="col-sm-12">
+								               <button type="button" class="btn btn-primary pull-right">{{trans('message.add_another_guest')}}</button>
+								            </div>
 								         </div>
 								         <div class="row form-top">
 								            <div class="col-sm-12">
-								               
-								            		<div id="guestTable" style="overflow-x:scroll;"></div>
-
+								               <div class="box box-primary">
+								                  <div class="box-header with-border">
+								                     <h3 class="box-title">Guest1</h3>
+								                     <div class="box-tools pull-right">
+								                     	<button type="button" class="btn btn-box-tool jsModal" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Search" data-modal-id="guestSearch">
+                  											<i class="fa fa-search" data-toggle="modal"></i>
+                  										</button>
+								                     </div>
+								                  </div>
+								                  <!-- /.box-header -->
+								                  <div class="box-body">
+								                     <!-- /.box-body -->
+								                     <div class="form-group">
+								                        <div class="row form-top">
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.name')? 'has-error': '' }}">
+								                              {{Form::hidden('guest[0][id]', old('guest.0.id'))}}
+								                              {{ Form::label('guest[0][name]', trans('message.name')) }}
+								                              {{ Form::text('guest[0][name]', old('guest.0.name'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.name'))
+								                              <small class="help-block">{{ $errors->first('guest.0.name') }}</small>
+								                              @endif
+								                           </div>
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.city')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][city]', trans('message.city')) }}
+								                              {{ Form::text('guest[0][city]', old('guest.0.city'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.city'))
+								                              <small class="help-block">{{ $errors->first('guest.0.city') }}</small>
+								                              @endif
+								                           </div>
+								                        </div>
+								                        <div class="row form-top">
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.state')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][state]', trans('message.state')) }}
+								                              {{ Form::text('guest[0][state]', old('guest.0.state'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.state'))
+								                              <small class="help-block">{{ $errors->first('guest.0.state') }}</small>
+								                              @endif
+								                           </div>
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.country')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][country]', trans('message.country')) }}
+								                              {{ Form::text('guest[0][country]', old('guest.0.country'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.country'))
+								                              <small class="help-block">{{ $errors->first('guest.0.country') }}</small>
+								                              @endif
+								                           </div>
+								                        </div>
+								                        <div class="row form-top">
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.zip')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][zip]', trans('message.zip')) }}
+								                              {{ Form::text('guest[0][zip]', old('guest.0.zip'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.zip'))
+								                              <small class="help-block">{{ $errors->first('guest.0.zip') }}</small>
+								                              @endif
+								                           </div>
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.email')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][email]', trans('message.email')) }}
+								                              {{ Form::email('guest[0][email]', old('guest.0.email'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.email'))
+								                              <small class="help-block">{{ $errors->first('guest.0.email') }}</small>
+								                              @endif
+								                           </div>
+								                        </div>
+								                        <div class="row form-top">
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.address')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][address]', trans('message.address')) }}
+								                              {{ Form::textarea('guest[0][address]', old('guest.0.address'), array('class' => 'form-control area-class', 'cols' => 50, 'rows' => 5)) }}
+								                              @if ($errors->has('guest.0.address'))
+								                              <small class="help-block">{{ $errors->first('guest.0.address') }}</small>
+								                              @endif
+								                           </div>
+								                           <div class="col-sm-6 {{ $errors->has('guest.0.mobile_no')? 'has-error': '' }}">
+								                              {{ Form::label('guest[0][mobile_no]', trans('message.mobile_no')) }}
+								                              {{ Form::text('guest[0][mobile_no]', old('guest.0.mobile_no'), array('class' => 'form-control')) }}
+								                              @if ($errors->has('guest.0.mobile_no'))
+								                              <small class="help-block">{{ $errors->first('guest.0.mobile_no') }}</small>
+								                              @endif
+								                           </div>
+								                        </div>
+								                     </div>
+								                  </div>
+								               </div>
 								            </div>
 								         </div>
 								      </div>
@@ -240,9 +264,4 @@
 
 	  </div>
 	</div>
-	<script type="text/javascript">
-		var formData = <?php echo json_encode($form_data); ?>;
-		console.log(formData)
-	</script>
-	<script type="text/babel" src="{{ asset('plugins/react/rent/guest.jsx') }}"></script>
 @endsection

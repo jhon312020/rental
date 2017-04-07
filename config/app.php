@@ -215,7 +215,8 @@ return [
 				Acacha\AdminLTETemplateLaravel\Providers\AdminLTETemplateServiceProvider::class,
 
 			'Form' => Collective\Html\FormFacade::class,
-      'HTML' => Collective\Html\HtmlFacade::class,
+            'HTML' => Collective\Html\HtmlFacade::class,
+            'Helper' => App\Helpers\Helper::class,
 
     ],
 
