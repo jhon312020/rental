@@ -1,0 +1,532 @@
+/* Color of invalid field */
+.has-error .control-label,
+.has-error .help-block,
+.has-error .form-control-feedback {
+    color: #a94442;
+}
+.min-height {
+	height: 50px;
+}
+.area-class {
+	resize:none;
+}
+.form-top {
+	margin-top: 20px;
+}
+.file-preview-thumbnails {
+    text-align: center;
+}
+.file-preview-frame {
+    margin: auto !important;
+    float: none !important;
+}
+.p-head {
+	cursor: pointer;
+	text-align: center;
+}
+.toppad {
+	margin-top:20px;
+}
+.text-area {
+	overflow:hidden;
+  /* demo only: */
+  /*padding:10px;*/
+  width:150px;
+
+  font-size:14px;
+  /*margin:50px auto;*/
+  display:block;
+  
+  position: absolute;
+  z-index : 999;
+  resize:none;
+}
+.rent_table tbody tr {
+  cursor: pointer;
+}
+.duplicateRow, .duplicateRow tr {
+  cursor: default !important;
+}
+
+.formError { z-index: 990; }
+.formError .formErrorContent { z-index: 991; }
+.formError .formErrorArrow { z-index: 996; }
+
+/*Form error css start*/
+.formError {
+  position: absolute;
+  top: 300px;
+  left: 300px;
+  display: block;
+  cursor: pointer;
+  text-align: left;
+}
+
+.formError.inline {
+  position: relative;
+  top: 0;
+  left: 0;
+  display: inline-block;
+}
+
+.ajaxSubmit {
+  padding: 20px;
+  background: #55ea55;
+  border: 1px solid #999;
+  display: none;
+}
+
+.formError .formErrorContent {
+  width: 100%;
+  background: #ee0101;
+  position:relative;
+  color: #fff;
+  min-width: 120px;
+  font-size: 11px;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 6px #000;
+  -moz-box-shadow: 0 0 6px #000;
+  -webkit-box-shadow: 0 0 6px #000;
+  -o-box-shadow: 0 0 6px #000;
+  padding: 4px 10px 4px 10px;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  -o-border-radius: 6px;
+}
+
+.formError.inline .formErrorContent {
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  -o-box-shadow: none;
+  border: none;
+  border-radius: 0;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  -o-border-radius: 0;
+}
+
+.greenPopup .formErrorContent {
+  background: #33be40;
+}
+
+.blackPopup .formErrorContent {
+  background: #393939;
+  color: #FFF;
+}
+
+.formError .formErrorArrow {
+  width: 15px;
+  margin: -2px 0 0 13px;
+  position:relative;
+}
+body[dir='rtl'] .formError .formErrorArrow,
+body.rtl .formError .formErrorArrow {
+  margin: -2px 13px 0 0;
+}
+
+.formError .formErrorArrowBottom {
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  -o-box-shadow: none;
+  margin: 0px 0 0 12px;
+  top:2px;
+}
+
+.formError .formErrorArrow div {
+  border-left: 2px solid #ddd;
+  border-right: 2px solid #ddd;
+  box-shadow: 0 2px 3px #444;
+  -moz-box-shadow: 0 2px 3px #444;
+  -webkit-box-shadow: 0 2px 3px #444;
+  -o-box-shadow: 0 2px 3px #444;
+  font-size: 0px;
+  height: 1px;
+  background: #ee0101;
+  margin: 0 auto;
+  line-height: 0;
+  font-size: 0;
+  display: block;
+}
+
+.formError .formErrorArrowBottom div {
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  -o-box-shadow: none;
+}
+
+.greenPopup .formErrorArrow div {
+  background: #33be40;
+}
+
+.blackPopup .formErrorArrow div {
+  background: #393939;
+  color: #FFF;
+}
+
+.formError .formErrorArrow .line10 {
+  width: 13px;
+  border: none;
+}
+
+.formError .formErrorArrow .line9 {
+  width: 11px;
+  border: none;
+}
+
+.formError .formErrorArrow .line8 {
+  width: 11px;
+}
+
+.formError .formErrorArrow .line7 {
+  width: 9px;
+}
+
+.formError .formErrorArrow .line6 {
+  width: 7px;
+}
+
+.formError .formErrorArrow .line5 {
+  width: 5px;
+}
+
+.formError .formErrorArrow .line4 {
+  width: 3px;
+}
+
+.formError .formErrorArrow .line3 {
+  width: 1px;
+  border-left: 2px solid #ddd;
+  border-right: 2px solid #ddd;
+  border-bottom: 0 solid #ddd;
+}
+
+.formError .formErrorArrow .line2 {
+  width: 3px;
+  border: none;
+  background: #ddd;
+}
+
+.formError .formErrorArrow .line1 {
+  width: 1px;
+  border: none;
+  background: #ddd;
+}
+/*Form error css end*/
+.tab-new a {
+  background : rgba(243,243,243,.85) !important;
+  cursor: pointer !important;
+  color: #000 !important;
+}
+.tab-new li.active a {
+  background : #fff !important;
+}
+.tab-new li.active a.green {
+  border-top: 1px solid #16a765 !important;
+}
+.tab-new li.active a.blue {
+  border-top: 1px solid #4986e7 !important;
+}
+.tab-new a:hover {
+  border-bottom:inherit;
+  border-left:inherit;
+  border-right:inherit;
+  color: #000 !important;
+}
+.tab-new .blue:hover {
+  border-top: 1px solid #4986e7 !important;
+}
+.tab-new .green:hover {
+  border-top: 1px solid #16a765 !important;
+}
+.amount-yes {
+  padding: 7px 30px;
+  color: #fff;
+}
+.red {
+  background: red;
+}
+.green {
+  background: green;
+}
+#guest_report_table tbody tr td:last-child {
+  text-align: center;
+}
+.total-p {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.total-span {
+  padding: 11px 36px;
+  background: green;
+  color: #fff;
+  font-size: 16px;
+}
+
+
+/* Month pciker css start */
+.mrp-container {
+  margin-bottom: 15px;
+}
+.mrp-icon{
+  border: solid 1px #ddd;
+  border-radius: 5px 0px 0px 5px;
+  color: #40667A;
+  background: #eee;
+  padding: 7px;
+  margin-right:0px;
+}
+
+.mrp-monthdisplay{
+  display:inline-block!important;
+  border: solid 1px #ddd;
+  padding: 6px 12px 6px 8px;
+  border-radius: 0px 5px 5px 0px;
+  background-color: #fff;
+  cursor:pointer;
+  margin-left: -5px;
+}
+
+.mrp-lowerMonth, .mrp-upperMonth{
+  color: #40667A;
+  font-weight:bold;
+  font-size: 11px;
+  text-transform:uppercase;
+}
+
+.mrp-to{
+  color: #aaa;
+  margin-right: 0px;
+  margin-left: 0px;
+  font-size: 11px;
+  text-transform: uppercase;
+  /* background-color: #eee; */
+  padding: 5px 3px 5px 3px;
+}
+
+.mpr-calendar{
+  display:inline-block;
+  padding: 3px 5px;
+  border-right: solid #999 1px;
+}
+
+.mpr-calendar::last-child{
+  border-right: none;  
+}
+
+.mpr-month{
+  padding: 20px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.mpr-calendar h5{
+  width:100%;
+  text-align:center;
+  font-weight:bold;
+  font-size:18px
+}
+
+.mpr-selected{
+  background: rgba(64, 102, 122, 0.75);;
+  color: #fff;
+}
+
+.mpr-month:hover{
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px #ddd inset;
+  cursor:pointer;
+}
+
+.mpr-selected.mpr-month:hover{
+  border-radius: 0px;
+  box-shadow: none;
+}
+
+.mpr-calendarholder .col-xs-6 {
+  max-width: 250px;
+  min-width: 250px;
+}
+
+.mpr-calendarholder .col-xs-1 {
+  max-width: 150px;
+  min-width: 150px;
+}
+
+.mpr-calendarholder .btn-info{
+  background-color: #40667A;
+  border-color: #406670;
+  width:100%;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  font-size: 10px;
+  padding: 10px 0px;
+}
+
+.mpr-quickset{
+  color: #666;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.mpr-yeardown, .mpr-yearup{
+  margin-left: 5px;
+  cursor: pointer;
+  color: #666;
+}
+
+.mpr-yeardown{
+  float:left;
+}
+
+.mpr-yearup{
+  float:right;
+}
+
+.mpr-yeardown:hover,.mpr-yearup:hover{
+  color: #40667A;
+}
+
+.mpr-calendar:first .mpr-selected:first{
+    background-color: #40667A;
+}
+
+.mpr-calendar:last .mpr-selected:last{
+    background-color: #40667A;
+}
+
+.popover{
+  max-width: 1920px!important;
+}
+/* Month picker css end */
+
+.search-btn {
+  position: relative;
+  top: -2px;
+  left: -6px;
+}
+
+/* Side nav start */
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover, .offcanvas a:focus{
+    color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.side-nav {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.side-nav {
+    position: fixed;
+    width: 0px;
+    right: 0;
+    top: 0;
+    margin: 0;
+    transition: 0.5s;
+    font-size: 15px;
+    height: 100%;
+    height: calc(100% + 30px);
+    height: -moz-calc(100%);
+    padding-bottom: 60px;
+    background-color: #d3d3d3;
+    z-index: 999;
+    overflow-y: auto;
+}
+.side-nav li {
+    float: none;
+    line-height: 35px;
+}
+.side-nav li:not(:first-child) {
+  padding-left: 15px;
+  display: table;
+}
+.side-nav li span {
+  display: table-cell;
+}
+
+.side-nav .userView {
+    position: relative;
+    padding: 70px 32px 0;
+    margin-bottom: 8px;
+}
+.side-nav .userView .background {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    color: #fff;
+}
+.side-nav .userView>a {
+    height: auto;
+    padding: 0;
+    color: #fff;
+}
+.side-nav .userView .circle {
+    height: 64px;
+    width: 64px;
+}
+
+.side-nav .userView .circle, .side-nav .userView .name, .side-nav .userView .email {
+    display: block;
+}
+
+.circle {
+    border-radius: 50%;
+}
+
+/* Side nav end */
+
+.excel-error {
+  position: absolute;
+  font-size: 10px;
+  top: 0px;
+  width: 100%;
+  left: 0px;
+  padding-top: 3px;
+  background: #a94442;
+  padding-bottom: 3px;
+  padding-left: 8px;
+  color: #fff;
+}
+.progress-css {
+  width: 85px;
+  height: 85px;
+  position: absolute;
+}
