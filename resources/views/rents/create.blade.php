@@ -2,11 +2,12 @@
 	if(count($errors)) {
 		$old_input = session()->getOldInput();
 		$form_data = isset($old_input['guest']) ? $old_input['guest'] : [];
+		//print_r($old_input);die;
 	} else {
 		$form_data = [];
 	}
 	//echo old('guest.1.name');die;
-	//print_r($form_data);die;
+	//print_r($errors);die;
 ?>
 @extends('layouts.app')
 
@@ -17,25 +18,25 @@
 @section('contentheader_title')
 	{{trans('message.rent_create')}}
 @endsection
-<style type="text/css">
-#guestTable .select2-container {
-	left : 20px;
-}
-#guestTable .select2-container:after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  width: 0px;
-  top: 1px;
-  height: 30px;
-  border-radius: 50%;
-  border-right: 1px solid #DDD;
-  border-left: 1px solid #fafafa;
-  margin-left: 165px;
-}
-</style>
+
 @section('main-content')
-	<div class="content spark-screen">
+	<style type="text/css">
+		#guestTable .select2-container {
+			left : 20px;
+		}
+		#guestTable .select2-container:after {
+		  content: "";
+		  position: absolute;
+		  z-index: 1;
+		  width: 0px;
+		  top: 1px;
+		  height: 30px;
+		  border-radius: 50%;
+		  border-right: 1px solid #DDD;
+		  border-left: 1px solid #fafafa;
+		  margin-left: 165px;
+		}
+	</style>	
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
@@ -43,7 +44,7 @@
 					<div class="panel-body">
 						<div class="col-sm-12">
 							<!-- if there are creation errors, they will show here-->
-							{{ HTML::ul($errors->all()) }}
+							<!--{{ HTML::ul($errors->all()) }}-->
 							{{ Form::open(array('url' => 'rents')) }}
 							<div class="panel-group" id="accordion">
 								<div class="panel panel-default">
@@ -104,7 +105,7 @@
 								         		<div class="col-sm-12">
 								         			<ul>
 								         				<?php
-								         					$mobile = false;
+								         					/* $mobile = false;
 								         					$email = false;
 								         					$name = false;
 								         				?>
@@ -129,7 +130,7 @@
 							         				@endif
 							         				@if ($errors->has('mobile_no'))
 							         					<li>{{ $errors->first('mobile_no') }}</li>
-							         				@endif
+							         				@endif */ ?>
 								         			</ul>
 								         		</div>
 								         </div>
@@ -159,7 +160,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	
 
 	<!-- Modal -->
 	<div id="guestSearch" class="modal fade" role="dialog">
@@ -242,7 +243,8 @@
 	</div>
 	<script type="text/javascript">
 		var formData = <?php echo json_encode($form_data); ?>;
-		console.log(formData)
+		var rent_errors = <?php echo json_encode($errors->getMessages()); ?>;
+		console.log(rent_errors)
 	</script>
 	<script type="text/babel" src="{{ asset('plugins/react/rent/guest.jsx') }}"></script>
 @endsection

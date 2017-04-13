@@ -23,7 +23,7 @@ class Helper
 
                     foreach ($filter_menus as $menus) {
                         if(!$menus['is_child']) {
-                            $sub_menus .= '<li><a href="' . $menus['menu_link'] . '"><i class="fa fa-' . $menus['menu_icon'] . '"></i> <span>' . $menus['menu_name'] . '</span></a></li>';
+                            $sub_menus .= '<li><a href="' . \URL::to($menus['menu_link']) . '"><i class="fa fa-' . $menus['menu_icon'] . '"></i> <span>' . $menus['menu_name'] . '</span></a></li>';
                         } else {
                             $sub_menus .= Helper::getSubmenus($menus, $parent_menus);
                         }

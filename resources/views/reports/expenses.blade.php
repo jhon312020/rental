@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-	{{trans('message.income_report')}}
+	{{trans('message.expense_report')}}
 @endsection
 
 @section('contentheader_title')
-	{{trans('message.income_report')}}
+	{{trans('message.expense_report')}}
 @endsection
 
 @section('main-content')
@@ -14,7 +14,7 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.monthly_income_report')}}</div>
+					<div class="panel-heading">{{trans('message.monthly_expense_report')}}</div>
 					<div class="panel-body">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
@@ -25,7 +25,7 @@
 					    </label>
 						</div>
 						<div class="row text-center">
-					    <p class="total-p"><span class="total-span">Total income: &#8377;&nbsp;<span id="month_total">{{ $total_monthly_income }}</span></span></p>
+					    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="month_total">{{ $total_monthly_expense }}</span></span></p>
 						</div>
 						<div class="row">
 							<div class="col-sm-12">
@@ -41,7 +41,7 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.yearly_income_report')}}</div>
+					<div class="panel-heading">{{trans('message.yearly_expense_report')}}</div>
 					<div class="panel-body">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
@@ -52,7 +52,7 @@
 					    </label>
 						</div>
 						<div class="row text-center">
-					    <p class="total-p"><span class="total-span">Total income: &#8377;&nbsp;<span id="year_total">{{ $total_yearly_income }}</span></span></p>
+					    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="year_total">{{ $total_yearly_expense }}</span></span></p>
 						</div>
 						<div class="row">
 							<div class="col-sm-12">
@@ -68,14 +68,14 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.income_report_between_date')}}</div>
+					<div class="panel-heading">{{trans('message.expense_report_between_date')}}</div>
 					<div class="panel-body">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 					    <div class="col-sm-12">
 					    	<div class="col-sm-4 col-sm-offset-4">
 						    	<div class="form-group">
-		                <label>Income between:</label>
+		                <label>Expenses between:</label>
 
 		                <div class="input-group">
 		                  <div class="input-group-addon">
@@ -87,30 +87,33 @@
 								        <button class="btn btn-secondary searchReport" type="button"><i class="fa fa-search"></i> Search</button>
 								      </span>
 		                </div>
+		                
+			             </div>
 		                <!-- /.input group -->
-		              </div>
-		              <div class="row text-center">
-								    <p class="total-p"><span class="total-span">Total income: &#8377;&nbsp;<span id="total_amount_date">{{ $total_incomes_between_date }}</span></span></p>
+		               <div class="row text-center">
+								    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="total_amount_date">{{ $total_expenses_between_date }}</span></span></p>
 									</div>
+		              </div>
+		              
 		             </div>
 					    </div>
-						</div>
+						
 						<div class="row">
 							<div class="col-sm-12">
 								<table class="table table-striped table-bordered reportTable">
 									<thead>
 										<tr>
-											<td>{{trans('message.date_of_income')}}</td>
-											<td>{{trans('message.income_type')}}</td>
+											<td>{{trans('message.date_of_expense')}}</td>
+											<td>{{trans('message.expense_type')}}</td>
 											<td>{{trans('message.amount')}}</td>
 											<td>{{trans('message.notes')}}</td>
 										</tr>
 									</thead>
 									<tbody>
-										@foreach($monthly_income_report as $key => $value)
+										@foreach($monthly_expense_report as $key => $value)
 											<tr>
-												<td>{{ $value->date_of_income }}</td>
-												<td>{{ $value->income_type }}</td>
+												<td>{{ $value->date_of_expense }}</td>
+												<td>{{ $value->expense_type }}</td>
 												<td>{{ $value->amount }}</td>
 												<td>{{ $value->notes }}</td>
 											</tr>
@@ -134,8 +137,8 @@
 
 	var year = '<?php echo date("Y"); ?>';
 
-	var month_report_ajax_url = ajax_url.get_income_report_month;
-	var year_report_ajax_url = ajax_url.get_income_report_year;
+	var month_report_ajax_url = ajax_url.get_expense_report_month;
+	var year_report_ajax_url = ajax_url.get_expense_report_year;
 
 	var x_axis = <?php echo json_encode($x_axis); ?>;
 	var y_axis = <?php echo $y_axis; ?>;
@@ -144,17 +147,17 @@
 
 	var monthChart = null;
 	var yearChart = null;
-	var repot_between_date = ajax_url.get_income_report_between_date;
+	var repot_between_date = ajax_url.get_expense_report_between_date;
 	
 	var columns_defs = {
 			"columnDefs": [
 		    {
 		    	"targets" : [0],
-		    	"data" : "date_of_income"
+		    	"data" : "date_of_expense"
 		    },
 		    {
 		    	"targets" : [1],
-		    	"data" : "income_type"
+		    	"data" : "expense_type"
 		    },
 		    {
 		    	"targets" : [2],
@@ -167,5 +170,5 @@
 	  	]
 		};
 	</script>
-	{{ HTML::script('plugins/highchart/js/income.js') }}
+	{{ HTML::script('plugins/highchart/js/expense.js') }}
 @endsection

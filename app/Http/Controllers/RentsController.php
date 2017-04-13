@@ -208,8 +208,34 @@ class RentsController extends Controller
 
         $inactive_rent_monthly = $this->rent_repo->inActiveRentsIncome($month, $year)->toArray();
 
+        $rooms = $this->room_repo->allActive()->toArray();
+        
         //print_r($rent_monthly);die;
        return view('rents.rent_monthly')
-            ->with(['rent_monthly' => $rent_monthly, 'bill_monthly' => $bill_monthly, 'inactive_bill_monthly' => $inactive_bill_monthly, 'inactive_rent_monthly' => $inactive_rent_monthly, "date_month" => $current_month, 'next_month' => $next_month]);
+            ->with(['rent_monthly' => $rent_monthly, 'bill_monthly' => $bill_monthly, 'inactive_bill_monthly' => $inactive_bill_monthly, 'inactive_rent_monthly' => $inactive_rent_monthly, "date_month" => $current_month, 'next_month' => $next_month, 'rooms' => $rooms]);
+    }
+
+    /**
+     * update the old rent record.
+     *
+     * @param  NULL
+     * @return Response
+     */
+    public function listUpdate ()
+    {
+       // get the nerd
+        $rent = $this->rent_repo->getAllGuestDetails()->toArray();
+
+        $rooms = $this->room_repo->allActive()->toArray();
+        //print_r($room);die;
+
+        if($rent) {
+            // show the edit form and pass the nerd
+            return view('rents.list_update')
+                ->with(['rent' => $rent, 'rooms' => $rooms ]);
+        } else {
+            return \Redirect::to('rents');
+        }
+        
     }
 }

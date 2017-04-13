@@ -94,6 +94,37 @@ class IncomesRepository
     }
 
     /**
+     * Get all active monthly Incomes.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getIncomesReportBetweenDates ($start_date, $end_date)
+    {
+        return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as rent_from')
+                    ->join('users', 'users.id', '=', 'incomes.user_id')
+                    ->join('rents', 'rents.id', '=', 'incomes.rent_id')
+                    ->join('guests', 'guests.id', '=', 'rents.guest_id')
+                    ->join('income_types', 'income_types.id', '=', 'incomes.income_type')
+                    ->where(array('incomes.is_active' => 1))
+                    ->whereRaw('DATE(tbl_incomes.date_of_income) >= ? AND DATE(tbl_incomes.date_of_income) <= ? ', [$start_date, $end_date])
+                    ->get();
+    }
+
+    /**
+     * Get all active monthly Incomes.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getIncomesReportBetweenDatesGroup ($start_date, $end_date)
+    {
+        return Incomes::select(\DB::raw('SUM(amount) as amount'), 'incomes.date_of_income')
+                    ->where(array('incomes.is_active' => 1))
+                    ->whereRaw('DATE(tbl_incomes.date_of_income) >= ? AND DATE(tbl_incomes.date_of_income) <= ? ', [$start_date, $end_date])
+                    ->groupBy('date_of_income')
+                    ->get();
+    }
+
+    /**
      * Get all active monthly Incomes by datewise.
      *
      * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
@@ -106,8 +137,47 @@ class IncomesRepository
                     from (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as a
                     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b
                     cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all select 6 union all select 7 union all select 8 union all select 9) as c
-                ) a LEFT JOIN (SELECT date_of_income, sum(amount) as amount FROM tbl_incomes group by date_of_income) bb on a.Date = bb.date_of_income
+                ) a LEFT JOIN (SELECT date_of_income, sum(amount) as amount FROM tbl_incomes where is_active = 1 group by date_of_income) bb on a.Date = bb.date_of_income
                 where a.Date between '$date' and last_day('$date') order by a.Date"));
+    }
+
+    /**
+     * Get total monthly Incomes by datewise.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getTotalMonthlyIncomes ($month, $year)
+    {
+        return Incomes::select(\DB::Raw('IF(SUM(amount) > 0, SUM(amount), 0) as amount'))
+                    ->where([ 'is_active' => 1 ])
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? AND YEAR(tbl_incomes.date_of_income) = ? ', [$month, $year])
+                    ->first();
+    }
+
+    /**
+     * Get total monthly Incomes by datewise.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getTotalYearlyIncomes ($year)
+    {
+        return Incomes::select(\DB::Raw('IF(SUM(amount) > 0, SUM(amount), 0) as amount'))
+                    ->where([ 'is_active' => 1 ])
+                    ->whereRaw('YEAR(tbl_incomes.date_of_income) = ? ', [$year])
+                    ->first();
+    }
+
+    /**
+     * Get total Incomes between dates.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getTotalIncomesByDates ($start_date, $end_date)
+    {
+        return Incomes::select(\DB::Raw('IF(SUM(amount) > 0, SUM(amount), 0) as amount'))
+                    ->where([ 'is_active' => 1 ])
+                    ->whereRaw('DATE(tbl_incomes.date_of_income) >= ? AND DATE(tbl_incomes.date_of_income) <= ?', [$start_date, $end_date])
+                    ->first();
     }
 
     /**
@@ -137,6 +207,32 @@ class IncomesRepository
                      WHERE YEAR(date_of_income) = '$year'
                     GROUP BY MONTH
                 ) AS SubTable1"));
+    }
+
+    /**
+     * Get total pending rents.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getTotalPendingRents ($month, $year)
+    {
+        return Incomes::select(\DB::Raw('IF(SUM(amount) > 0, SUM(amount), 0) as amount'))
+                    ->where([ 'is_active' => 1, 'income_type' => \DB::raw(\Config::get('constants.RENT')), 'rent_amount_received' => 0 ])
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? AND YEAR(tbl_incomes.date_of_income) = ? ', [$month, $year])
+                    ->first();
+    }
+
+    /**
+     * Get total pending guests.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getTotalPendingGuests ($month, $year)
+    {
+        return Incomes::select(\DB::Raw('IF(COUNT(id) > 0, COUNT(id), 0) as total'))
+                    ->where([ 'is_active' => 1, 'income_type' => \DB::raw(\Config::get('constants.RENT')), 'rent_amount_received' => 0 ])
+                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? AND YEAR(tbl_incomes.date_of_income) = ? ', [$month, $year])
+                    ->first();
     }
     
 }

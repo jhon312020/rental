@@ -71,4 +71,39 @@ class GuestsRepository
     {
         return Guests::where(array('is_active' => 1))->get();
     }
+
+    /**
+     * Get guest list by type of seach.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Guests[]
+     */
+    public function getGuestDetailsByType ($data)
+    {
+      $value = $data['column_value'];
+      $search = $data['column_search'];
+        return Guests::select(\DB::raw('tbl_guests.'.$search.' as label'), \DB::raw('tbl_guests.'.$search.' as value'), 'guests.id')
+                    ->leftjoin('rents', function($join)
+                     {
+                         $join->on('rents.guest_id', '=', 'guests.id')
+                            ->on('rents.is_active', '=', \DB::raw('1'))
+                            ->on('rents.checkout_date', 'is', \DB::raw('null'));
+                     })
+                    ->where(array('guests.is_active' => 1, 'rents.id' => null))
+                    ->where('guests.'.$search, 'like', "%$value%")
+                    ->whereNotIn('guests.id', explode(',', $data['guest_ids']))
+                    ->skip(0)->take(50)
+                    ->get();
+    }
+
+    /**
+     * Get guest list by id.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Guests[]
+     */
+    public function getGuestDetailsById ($id)
+    {
+        return Guests::select('guests.id as guest_id', 'guests.name', 'guests.email', 'guests.mobile_no', 'guests.city', 'guests.state', 'guests.country', 'guests.address', 'guests.id')
+                  ->where([ 'id' => $id ])
+                    ->first();
+    }
 }

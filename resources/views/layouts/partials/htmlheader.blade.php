@@ -61,8 +61,18 @@
 
   <!-- Date range picker css -->
   <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker-bs3.css') }}">
+
+  <!-- Dashboard css -->
+  <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+
+  <!-- Materialize css -->
+  <!--<link rel="stylesheet" href="{{ asset('plugins/materialize/css/materialize.css') }}">-->
   <!-- jQuery 2.1.4 -->
     <script src="{{ asset('/plugins/jQuery/jquery-1.12.4.js') }}"></script>
+
+    <!-- Progressbar js -->
+    <script src="{{ asset('plugins/progressbar/js/progressbar.js') }}" type="text/javascript"></script>
+    
     <script>
     var ASSETS_PATH = "{{ asset('img') }}";
     </script>
@@ -91,6 +101,18 @@
               get_income_report :  "{{action('AjaxController@incomeReport')}}",
               get_income_report_month :  "{{action('AjaxController@incomeReportMonth')}}",
               get_income_report_year :  "{{action('AjaxController@incomeReportYear')}}",
+              get_income_report_between_date : "{{action('AjaxController@incomeReportBetweenDate')}}",
+              get_expense_report_month :  "{{action('AjaxController@expenseReportMonth')}}",
+              get_expense_report_year :  "{{action('AjaxController@expenseReportYear')}}",
+              get_expense_report_between_date : "{{action('AjaxController@expenseReportBetweenDate')}}",
+              get_electricity_bill_report_month :  "{{action('AjaxController@getElectricityBillReportMonth')}}",
+              get_electricity_bill_report_year : "{{action('AjaxController@getElectricityBillReportYear')}}",
+              get_electricity_bill_report_between_month : "{{action('AjaxController@getElectricityBillReportBetweenMonth')}}",
+              get_guest_details_by_type : "{{action('AjaxController@getGuestDetailsByType')}}",
+              get_guest_by_id : "{{action('AjaxController@getGuestById')}}",
+              add_new_rent_by_room_guest : "{{action('AjaxController@addNewRentByRoomAndGuest')}}",
+              get_bill_by_room_no : "{{action('AjaxController@getBillByRoomNo')}}",
+              get_rent_by_room_no : "{{action('AjaxController@getRentByRoomNo')}}",
           };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

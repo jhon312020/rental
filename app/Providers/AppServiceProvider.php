@@ -40,6 +40,37 @@ class AppServiceProvider extends ServiceProvider
             
             
         });
+
+        \Validator::extend('notexists', function ($attribute, $value, $parameters, $validator) {
+            $table = $parameters[0];
+            $field = $parameters[1];
+            //echo $field;die;
+            unset($parameters[0], $parameters[1]);
+            $query = \DB::table( $table )->select(\DB::raw( 1 ))
+            ->where(function($query) use( $parameters, $field, $value ) {
+              $query->where($field , $value);
+              foreach ($parameters as $key => $data) {
+                if($key % 2 == 0) {
+                  if($parameters[$key + 1] == 'NULL') {
+                    $query->whereNull($data);
+                  } else {
+                    $query->where($data, $parameters[$key + 1]);
+                  }
+                  
+                }
+              }
+            });
+            
+          /*echo $query->toSql();
+          print_r($query->getBindings());*/
+          //print_r($query->count());die;
+          
+          if($query->count() > 0) {
+            return false;
+          } else {
+            return true;
+          }
+        });
     }
 
     /**

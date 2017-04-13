@@ -9,9 +9,10 @@
 @endsection
 
 @section('main-content')
-	<div class="container spark-screen">
+	
+	
 		<div class="row">
-			<div class="col-md-11">
+			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{trans('message.room_report')}}</div>
 					<div class="panel-body">
@@ -35,7 +36,7 @@
 					    </label>
 						</div>
 						<!--<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>-->
-						<table class="table table-striped table-bordered roomReportTable">
+						<table class="table table-striped table-bordered reportTable">
 							<thead>
 								<tr>
 									<td>{{trans('message.room_no')}}</td>
@@ -61,7 +62,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	
 	<script type="text/javascript">
 	var reportTable = null;
 	var list_room = <?php echo json_encode($all_room); ?>;

@@ -50,7 +50,7 @@
 	<!-- Modal -->
 	<script type="text/javascript">
 		var formData = <?php echo json_encode($rent); ?>;
-		var room = <?php echo json_encode($room); ?>;
+		var rooms = <?php echo json_encode($rooms); ?>;
 	</script>
-	<script type="text/babel" src="{{ asset('plugins/react/rent/guest_edit.jsx') }}"></script>
+	<script type="text/babel" src="{{ asset('plugins/react/rent/list_update.jsx') }}"></script>
 @endsection

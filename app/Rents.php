@@ -70,6 +70,7 @@ class Rents extends Model
   */
 	public function validate($data)
   {
+  		//print_r($data);die;
   		$this->post = $data;
   		$unique_value = array('email', 'mobile_no');
   		$guest_rules = array(
@@ -91,14 +92,20 @@ class Rents extends Model
 	  				if(in_array($name, $unique_value)) {
 	  					if(isset($array_data['guest_id'])) {
 	  						$this->rules[$input_name] = $guest_rules[$name].','.$array_data['guest_id'].',id,is_active,1';
+	  						
 	  					} else {
 	  						$this->rules[$input_name] = $guest_rules[$name].',NULL,id,is_active,1';
 	  					}
 	  				} else {
 	  					if(isset($guest_rules[$name])) {
-	  						$this->rules['guest.'. $key .'.'.$name] = $guest_rules[$name];
+	  						$this->rules[$input_name] = $guest_rules[$name];
 	  					}
 	  				}
+
+	  				if(isset($array_data['guest_id']) && $array_data['guest_id'] && !isset($array_data['rent_id'])) {
+	  					$this->rules['guest.'.$key.'.guest_id'] = 'notexists:rents,guest_id,is_active,1,checkout_date,NULL';
+	  				}
+
 	  			}
 	  		}
   		}
@@ -151,6 +158,8 @@ class Rents extends Model
 	  			}
 
 	  		}
+
+
 			});
 
 			//Set the name of the error message.
@@ -747,5 +756,59 @@ class Rents extends Model
 
         return [ 'success' => true ];
         
+    }
+
+    /**
+     * Create the new rent by room id and guest.
+     *
+     * @param  ids
+     * @return Response
+    */
+    public function addNewRentByRoomAndGuest ($room_id, $guest_id)
+    {
+    		$income_model = new Incomes();
+
+        $guests = new Guests();
+
+        //$guest_id = $guests->insertGetId([]);
+
+        $user_id = \Auth::User()->id;
+
+        $rent_data = [ "room_id" => $room_id, "guest_id" => $guest_id, "checkin_date" => null, "checkout_date" => null, "user_id" => $user_id ];
+
+        $id = $this->insertGetId($rent_data);
+
+        $incomes_data = 
+					array(
+							"rent_id" => $id,
+							"amount" => 0,
+							"income_type" => \Config::get('constants.ADVANCE'),
+							"user_id" => $user_id,
+							"date_of_income" => date('Y-m-d')
+						);
+
+				$income_model->insert($incomes_data);
+
+        return [ 'success' => true ];
+        
+    }
+
+    /**
+     * Check if the guest is already exists or not.
+     *
+     * @param  $guest_id
+     * @return Response
+    */
+    public function checkValidGuest ($guest_id)
+    {
+    	$rent_count = $this->select('rents.id')
+    								->where([ 'is_active' => 1, 'checkout_date' => null, 'guest_id' => $guest_id ])
+    								->count();
+
+    	if($rent_count > 0) {
+    		return false;
+    	}
+
+    	return true;
     }
 }

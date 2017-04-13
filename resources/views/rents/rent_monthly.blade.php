@@ -12,6 +12,38 @@
 @endsection
 
 @section('main-content')
+	<style type="text/css">
+		#guestTable .select2-container {
+			left : 20px;
+		}
+		#guestTable .select2-container:after {
+		  content: "";
+		  position: absolute;
+		  z-index: 1;
+		  width: 0px;
+		  top: 1px;
+		  height: 30px;
+		  border-radius: 50%;
+		  border-right: 1px solid #DDD;
+		  border-left: 1px solid #fafafa;
+		  margin-left: 165px;
+		}
+		#billTable .select2-container {
+			left : 20px;
+		}
+		#billTable .select2-container:after {
+		  content: "";
+		  position: absolute;
+		  z-index: 1;
+		  width: 0px;
+		  top: 1px;
+		  height: 30px;
+		  border-radius: 50%;
+		  border-right: 1px solid #DDD;
+		  border-left: 1px solid #fafafa;
+		  margin-left: 165px;
+		}
+	</style>
 	<div class="content spark-screen">
 		<div class="row">
 			<div class="col-md-12">
@@ -81,6 +113,7 @@
 		var trashBillData = <?php echo json_encode($inactive_bill_monthly); ?>;
 		var dateMonth = '<?php echo $date_month; ?>';
 		var nextMonth = '<?php echo $next_month; ?>';
+		var rooms = <?php echo json_encode($rooms); ?>;
 		console.log(nextMonth)
 	</script>
 	<script type="text/babel" src="{{ asset('plugins/react/rent/rent_month.jsx') }}"></script>

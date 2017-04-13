@@ -35,7 +35,7 @@
 					    </label>
 						</div>
 						<!--<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>-->
-						<table class="table table-striped table-bordered roomReportTable" id="guest_report_table">
+						<table class="table table-striped table-bordered reportTable" id="guest_report_table">
 							<thead>
 								<tr>
 									<td>{{trans('message.name')}}</td>
@@ -100,5 +100,4 @@
 	  	]
 		};
 	</script>
-	{{ HTML::script('plugins/highchart/js/income.js') }}
 @endsection

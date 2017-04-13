@@ -98,7 +98,29 @@ return [
         /* Report page */
         'rent_report' => 'Rent report',
         'room_report' => 'Room report',
+        'income_report' => 'Income report',
+        'monthly_income_report' => 'Monthly income report',
+        'yearly_income_report' => 'Yearly income report',
+        'income_report_between_date' => 'Income report between date',
+        'expense_report' => 'Expense report',
+        'monthly_expense_report' => 'Monthly expense report',
+        'yearly_expense_report' => 'Yearly expense report',
+        'expense_report_between_date' => 'Expense report between date',
+        'electricity_bill_report' => 'Electricity bill report',
+        'yearly_electricity_bill_report' => 'Yearly electricity bill report',
+        'electricity_bill_report_between_months' => 'Electricity bill report between months',
+        'billing_month_year' => 'Billing month year',
         /* Report page end */
+
+        /*Dashboars start*/
+        'pending_rent_count' => 'Pending rent count',
+        'pending_rent_amount' => 'Pending rent amount',
+        'total_expenses' => 'Total expenses',
+        'total_incomes' => 'Total incomes',
+        'last_30_days_income_expense' => 'Last 30 days income and expense',
+        'paid_guests_list' => 'Paid guests list',
+        'unpaid_guests_list' => 'Unpaid guests list',
+        /*Dashboard end*/
 
     /* page title end */
 

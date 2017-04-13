@@ -57,9 +57,14 @@
 
 <!-- AdminLTE App -->
 <script src="{{ asset('plugins/highchart/js/highcharts.src.js') }}" type="text/javascript"></script>
+
+<!-- Materialize js -->
+<!--<script src="{{ asset('plugins/materialize/js/materialize.js') }}" type="text/javascript"></script>-->
+
 <!-- Date range picker -->
 <script src="{{ asset('plugins/daterangepicker/moment.min.js') }}" type="text/javascript"></script>
 <script src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
+<script src="{{ asset('plugins/daterangepicker/monthrangepicker.js') }}" type="text/javascript"></script>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
       Both of these plugins are recommended to enhance the
       user experience. Slimscroll is required when using the

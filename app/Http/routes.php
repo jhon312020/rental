@@ -68,12 +68,15 @@ Route::group(['prefix' => 'rents'], function () {
 	Route::get('/{id}/destroy', 'RentsController@destroy');
 	Route::get('/get-rent-monthly', 'RentsController@rentMonthlyReport');
 	Route::get('/{room_id}/rent-edit', 'RentsController@editRentByRoomId');
+	Route::get('/list-update', 'RentsController@listUpdate');
 });
 
 Route::group(['prefix' => 'reports'], function () {
 	Route::get('/rooms', 'ReportsController@rooms');
 	Route::get('/rents', 'ReportsController@rentMonthlyReport');
 	Route::get('/incomes', 'ReportsController@incomeReport');
+	Route::get('/expenses', 'ReportsController@expenseReport');
+	Route::get('/electricity', 'ReportsController@electricityBillReport');
 });
 
 Route::resource('rents', 'RentsController');
@@ -95,4 +98,16 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/income-report', 'AjaxController@incomeReport');
 	Route::post('/income-report-month', 'AjaxController@incomeReportMonth');
 	Route::post('/income-report-year', 'AjaxController@incomeReportYear');
+	Route::post('/income-report-between-date', 'AjaxController@incomeReportBetweenDate');
+	Route::post('/expense-report-month', 'AjaxController@expenseReportMonth');
+	Route::post('/expense-report-year', 'AjaxController@expenseReportYear');
+	Route::post('/expense-report-between-date', 'AjaxController@expenseReportBetweenDate');
+	Route::post('/get-electricity-bill-report-month', 'AjaxController@getElectricityBillReportMonth');
+	Route::post('/get-electricity-bill-report-year', 'AjaxController@getElectricityBillReportYear');
+	Route::post('/get-electricity-bill-report-between-month', 'AjaxController@getElectricityBillReportBetweenMonth');
+	Route::post('/get-guest-details-by-type', 'AjaxController@getGuestDetailsByType');
+	Route::post('/get-guest-by-id', 'AjaxController@getGuestById');
+	Route::post('/add-new-rent-by-room-and-guest', 'AjaxController@addNewRentByRoomAndGuest');
+	Route::post('/get-bill-by-room-no', 'AjaxController@getBillByRoomNo');
+	Route::post('/get-rent-by-room-no', 'AjaxController@getRentByRoomNo');
 });
