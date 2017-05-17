@@ -9,7 +9,6 @@
 @endsection
 
 @section('main-content')
-	<div class="content spark-screen">
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
@@ -165,5 +164,4 @@
 				</div>
 			</div>
 		</div>
-	</div>
 @endsection

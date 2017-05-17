@@ -44,7 +44,6 @@
 		  margin-left: 165px;
 		}
 	</style>
-	<div class="content spark-screen">
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
@@ -54,26 +53,7 @@
 							<!-- if there are creation errors, they will show here-->
 							<!--{{ HTML::ul($errors->all()) }}-->
 							<div class="panel-group" id="accordion">
-								<div class="panel panel-default">
-								   <div class="panel-heading p-head" data-parent="#accordion" data-toggle="collapse" data-target="#collapse1">
-								      <h4 class="panel-title">
-								         {{trans('message.electric_bill_details_month')}}
-								      </h4>
-								   </div>
-								   <div id="collapse1" class="panel-collapse collapse in">
-								      <div class="panel-body">
-								        <div class="form-group">
-										       <div class="row form-top">
-										        <div class="col-sm-12">
-										               
-										          <div id="billTable"></div>
-
-										        </div>
-										      </div>
-										     </div>
-										  </div>
-										</div>
-								</div>
+								
 
 								<div class="panel panel-default">
 								  <div class="panel-heading p-head" data-parent="#accordion" data-toggle="collapse" data-target="#collapse2">
@@ -95,6 +75,27 @@
 									  </div>
 									</div>
 								</div>
+
+								<div class="panel panel-default">
+								   <div class="panel-heading p-head" data-parent="#accordion" data-toggle="collapse" data-target="#collapse1">
+								      <h4 class="panel-title">
+								         {{trans('message.electric_bill_details_month')}}
+								      </h4>
+								   </div>
+								   <div id="collapse1" class="panel-collapse collapse in">
+								      <div class="panel-body">
+								        <div class="form-group">
+										       <div class="row form-top">
+										        <div class="col-sm-12">
+										               
+										          <div id="billTable"></div>
+
+										        </div>
+										      </div>
+										     </div>
+										  </div>
+										</div>
+								</div>
 								
 
 							</div>
@@ -103,7 +104,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
 
 	
 	<script type="text/javascript">

@@ -20,6 +20,10 @@ use App\Repositories\ElectricityBillRepository;
 
 use App\Rents;
 
+use App\IncomeTypes;
+
+use App\ExpenseTypes;
+
 use App\Incomes;
    
 use App\ElectricityBill;
@@ -38,6 +42,8 @@ class AjaxController extends Controller
     protected $expense_repo;
     protected $room_repo;
     protected $guest_repo;
+    protected $income_types;
+    protected $expense_types;
     public function __construct()
     {
         $this->middleware('auth');
@@ -50,6 +56,8 @@ class AjaxController extends Controller
         $this->expense_repo = new ExpensesRepository();
         $this->bill_repo = new ElectricityBillRepository();
         $this->guest_repo = new GuestsRepository();
+        $this->income_types = new IncomeTypes();
+        $this->expense_types = new ExpenseTypes();
     }
     /**
      * Monthly rent report.
@@ -87,6 +95,15 @@ class AjaxController extends Controller
         $post_params = $request->all();
 
         $result = $this->rent_repo->getGuestDetailsForRoom($post_params)->toArray();
+
+        
+        $incharge_array = 
+          array_filter($result, function ($value) {
+              return $value['is_incharge'] == 1;
+          });
+        if(count($incharge_array) > 1) {
+          array_walk ( $result, function (&$key) { $key["is_incharge"] = 0; } );
+        }
 
         return response()->json([ 'guests' => $result, 'guest_ids' => array_column($result, 'guest_id') ]);
         
@@ -754,5 +771,50 @@ class AjaxController extends Controller
 
         return response()->json([ 'rent_income' => $rent_income, 'inactive_rent_income' => $inactive_rent_income ]);
         
+    }
+
+    /**
+     * create the new income type.
+     *
+     * @param  
+     * @return Response
+    */
+    public function createIncomeType (Request $request)
+    {
+
+        $post_params = $request->all();
+        $data['type_of_income'] = $post_params['category'];
+        $valid = $this->income_types->ajaxValidate($data);
+        if($valid) {
+          $id = $this->income_types->ajaxInsertOrUpdate($post_params);
+          // redirect
+          return response()->json([ 'success' => true, 'msg' => 'New income type created successfully!', 'id' => $id, 'value' => $post_params['category'] ]);
+
+        } else {
+          $errors = $this->income_types->errors();
+          return response()->json(['errors' => 'Invalid', 'msg' => $errors, 'status' => 400], 400);          
+        }
+    }
+    /**
+     * create the new expense type.
+     *
+     * @param  
+     * @return Response
+    */
+    public function createExpenseType (Request $request)
+    {
+
+        $post_params = $request->all();
+        $data['type_of_expense'] = $post_params['category'];
+        $valid = $this->expense_types->ajaxValidate($data);
+        if($valid) {
+         $id =  $this->expense_types->ajaxInsertOrUpdate($post_params);
+          // redirect
+          return response()->json([ 'success' => true, 'msg' => 'New expense type created successfully!', 'id' => $id, 'value' => $post_params['category'] ]);
+
+        } else {
+          $errors = $this->expense_types->errors();
+          return response()->json(['errors' => 'Invalid', 'msg' => $errors, 'status' => 400], 400);          
+        }
     }
 }

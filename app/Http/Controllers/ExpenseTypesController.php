@@ -25,7 +25,7 @@ class ExpenseTypesController extends Controller
 		$this->expense_types = new ExpenseTypes();
         $this->expense_types_repo = new ExpenseTypesRepository();
 
-        \View::share('page_name_active', trans('message.expense_types'));
+        //\View::share('page_name_active', trans('message.expense_types'));
     }
     /**
      * Display a listing of the expense-types.

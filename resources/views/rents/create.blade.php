@@ -2,9 +2,18 @@
 	if(count($errors)) {
 		$old_input = session()->getOldInput();
 		$form_data = isset($old_input['guest']) ? $old_input['guest'] : [];
+		//print_r($form_data);die;
+		if(isset($old_input['guest'])) {
+			$new_data = array_filter($form_data, function($v) { return !isset($v['rent_id']); });
+		} else {
+			$new_data = [];
+		}
+		
 		//print_r($old_input);die;
+		//print_r($new_data);die;
 	} else {
 		$form_data = [];
+		$new_data = [];
 	}
 	//echo old('guest.1.name');die;
 	//print_r($errors);die;
@@ -243,6 +252,7 @@
 	</div>
 	<script type="text/javascript">
 		var formData = <?php echo json_encode($form_data); ?>;
+		var newData = <?php echo json_encode($new_data); ?>;
 		var rent_errors = <?php echo json_encode($errors->getMessages()); ?>;
 		console.log(rent_errors)
 	</script>

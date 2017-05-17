@@ -110,4 +110,6 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/add-new-rent-by-room-and-guest', 'AjaxController@addNewRentByRoomAndGuest');
 	Route::post('/get-bill-by-room-no', 'AjaxController@getBillByRoomNo');
 	Route::post('/get-rent-by-room-no', 'AjaxController@getRentByRoomNo');
+	Route::post('/create-income-type', 'AjaxController@createIncomeType');
+	Route::post('/create-expense-type', 'AjaxController@createExpenseType');
 });

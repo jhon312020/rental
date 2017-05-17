@@ -9,9 +9,21 @@
 @endsection
 
 @section('main-content')
-	<div class="container spark-screen">
+	<div id="slide-out" class="side-nav">
+		<div class="userView">
+			<div class="form-group">
+				<label><?php echo  trans('message.type_of_expense'); ?></label>
+				<input type="text" name="category" class="form-control" />
+			</div>
+			<div class="form-group form-top text-center">
+				<div class="col-sm-12">
+					<buttton type="button"  class="btn btn-primary jsCreateType"><?php echo trans('message.create_expense_type') ?></button>
+				</div>
+			</div>
+		</div>	
+	</div>
 		<div class="row">
-			<div class="col-md-11">
+			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{ trans('message.expense_update') }}</div>
 					<div class="panel-body">
@@ -24,7 +36,8 @@
 									<div class="row form-top">
 										<div class="col-sm-6 {{ $errors->has('expense_type')? 'has-error': '' }}">
 											{{ Form::label('expense_type', trans('message.expense_type')) }}
-											{{ Form::select('expense_type', $expense_types, null, array('class' => 'form-control')) }}
+											<i class="fa fa-plus-circle add-types jaAddTypes"></i>
+											{{ Form::select('expense_type', $expense_types, null, array('class' => 'form-control select2')) }}
 											@if ($errors->has('expense_type'))
 											<small class="help-block">{{ $errors->first('expense_type') }}</small>
 											@endif
@@ -70,5 +83,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+		<script type="text/javascript">
+		var type_url = ajax_url.create_expense_type;
+		</script>
 @endsection

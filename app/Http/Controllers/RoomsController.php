@@ -25,7 +25,7 @@ class RoomsController extends Controller
 		$this->rooms = new Rooms();
         $this->room_repo = new RoomsRepository();
 
-        \View::share('page_name_active', trans('message.rooms'));
+        //\View::share('page_name_active', trans('message.rooms'));
     }
     /**
      * Display a listing of the rooms.

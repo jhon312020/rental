@@ -32,9 +32,9 @@ class Guests extends Model
   {
   		if(isset($data['id'])) {
 				$this->rules['email'] = $this->rules['email'].','.$data['id'].',id,is_active,1';
-				$this->rules['email'] = $this->rules['email'].','.$data['id'].',id,is_active,1';
+				$this->rules['mobile_no'] = $this->rules['mobile_no'].','.$data['id'].',id,is_active,1';
 			} else {
-				$this->rules['mobile_no'] = $this->rules['mobile_no'].',NULL,id,is_active,1';
+				$this->rules['email'] = $this->rules['email'].',NULL,id,is_active,1';
 				$this->rules['mobile_no'] = $this->rules['mobile_no'].',NULL,id,is_active,1';
 			}
 	    // make a new validator object

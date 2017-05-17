@@ -273,7 +273,7 @@ var jqueryValidate = {
 			stack: false
 		})
 	},
-	filterArray : function (array, guest_ids) {
+	filterArray : function (array, new_row, guest_ids) {
 		var deferred = $.Deferred();
 		//console.log(array, guest_ids);
 		
@@ -287,7 +287,13 @@ var jqueryValidate = {
 			return !arr.selected;
 		});
 		
-		deferred.resolve({ grid : finalArray, guest_ids : guest_ids });
+		var finalNewRows = 
+			new_row.filter(function(arr, index) {
+				return !arr.selected;
+			});
+			
+		
+		deferred.resolve({ grid : finalArray, guest_ids : guest_ids, newRow : finalNewRows });
 		
 		return deferred.promise();
 	}

@@ -38,7 +38,7 @@ class RentsController extends Controller
 
         $room = $this->room_repo->allActive()->lists('room_no', 'id')->toArray();        
         $rooms = array('' => 'Select') + $room;
-        \View::share(['page_name_active' => trans('message.rents_page'), 'rooms' => $rooms]);
+        \View::share(['rooms' => $rooms]);
     }
     /**
      * Display a listing of the rents.
@@ -49,6 +49,9 @@ class RentsController extends Controller
     {
         // get all the nerds
         $rents = $this->rent_repo->allActive();
+
+        /*echo "<pre>";
+        print_r($rents);die;*/
 
         // load the view and pass the nerds
         return view('rents.index')
@@ -71,19 +74,20 @@ class RentsController extends Controller
      */
     public function store(Request $request)
     {
-		$data = $request->all();
+  		$data = $request->all();
 
-        //print_r($data);die;
+      /*echo "<pre>";
+      print_r($data);die;*/
 
-		$valid = $this->rents->validate($data);
-		if($valid) {
-			$this->rents->insertOrUpdate($data);
-			// redirect
-			return \Redirect::to('rents');
-		} else {
-			$errors = $this->rents->errors();
-			return redirect()->back()->withErrors($errors)->withInput();
-		}
+  		$valid = $this->rents->validate($data);
+  		if($valid) {
+  			$this->rents->insertOrUpdate($data);
+  			// redirect
+  			return \Redirect::to('rents');
+  		} else {
+  			$errors = $this->rents->errors();
+  			return redirect()->back()->withErrors($errors)->withInput();
+  		}
     }
     /**
      * Display the specified resource.
@@ -205,6 +209,9 @@ class RentsController extends Controller
         $this->rents->createRentsDetailsForRooms($month, $year);
 
         $rent_monthly = $this->rent_repo->activeRentsIncome($month, $year)->toArray();
+
+        /*echo "<pre>";
+        print_r($rent_monthly);die;*/
 
         $inactive_rent_monthly = $this->rent_repo->inActiveRentsIncome($month, $year)->toArray();
 

@@ -211,9 +211,10 @@ $(document).ready(function() {
 
   })
 
-	$('.select2').select2({
-		width: '100%'
-	});
+	var $select = 
+		$('.select2').select2({
+			width: '100%'
+		});
 	//console.log(file_path)
 	var initial_preview = [];
 	var caption = [];
@@ -371,7 +372,7 @@ $(document).ready(function() {
 											'<td>' + value.advance + '</td>'+
 											'<td>' + value.checkin_date + '</td>'+
 											'<td>'+
-											'<a href="' + APP_URL + '/rents/' + value.id + '/edit" class="btn btn-info btn-sm">'+
+											'<a href="' + APP_URL + '/rents/' + value.id + '/edit" class="btn btn-info btn-sm" style="margin-right:3px;">'+
 												'<span class="glyphicon glyphicon-edit"></span>'+
 											'</a>'+
 											'<a href="javascript::" data-href="' + APP_URL + '/rents/' + value.id + '/destroy" class="btn btn-danger btn-sm jsDelete">'+
@@ -392,4 +393,71 @@ $(document).ready(function() {
       $('.duplicateDiv').slideDown('slow');
 		})
 	})
+
+	var $href = window.location.href;
+	var $activeElement = $('.sidebar-menu a[href="' + $href +  '"]');
+	var $createHref = $href.replace('/create', '');
+	var $editHref = $href.replace(/\/\d\/edit/, '');
+	//console.log($editHref, $href)
+
+	if($activeElement.length) {
+		$activeElement.closest('li').addClass('active');
+		$activeElement.closest('ul.treeview-menu').addClass('menu-open');
+		$activeElement.closest('li.treeview').addClass('active');
+	} else if($('.sidebar-menu a[href="' + $createHref +  '"]').length) {
+			var $activeElement = $('.sidebar-menu a[href="' + $createHref +  '"]');
+			$activeElement.closest('li').addClass('active');
+			$activeElement.closest('ul.treeview-menu').addClass('menu-open');
+			$activeElement.closest('li.treeview').addClass('active');
+	} else if($('.sidebar-menu a[href="' + $editHref +  '"]').length) {
+			var $activeElement = $('.sidebar-menu a[href="' + $editHref +  '"]');
+			$activeElement.closest('li').addClass('active');
+			$activeElement.closest('ul.treeview-menu').addClass('menu-open');
+			$activeElement.closest('li.treeview').addClass('active');
+	}
+
+	$(document).on('click', '.jaAddTypes', function () {
+		if($('.side-nav').width() == 0) {
+			$('.side-nav').css('width', '300px');
+		} else {
+			$('.side-nav').css('width', '0px');
+		}
+	});
+
+	$(document).on('click', 'body', function ( event ) {
+		if($('.side-nav').width() > 0 && !$(event.target).closest('.side-nav').length && event.target.id != 'slide-out') {
+			$('.side-nav').css('width', '0px');
+		}
+	});
+
+	$(document).on('click', '.jsCreateType', function ( event ) {
+		var $input = $('input[name=category]');
+		$input.closest('.form-group').removeClass('has-error');
+		$('.side-nav .help-block').remove();
+		if(!$input.val().trim().length) {
+			$input.closest('.form-group').addClass('has-error').focus();
+			$input.after('<small class="help-block">This field is required.</small>');
+			return false;
+		}
+		var form_data = { category : $input.val() };
+		loadAndSave.save(form_data, type_url).then(function ( data ) {
+			$('.side-nav').css('width', '0px');
+			$input.val('');
+			// Create the DOM option that is pre-selected by default
+	    var option = new Option(data.value, data.id, true, true);
+	     // Append it to the select
+    	$select.append(option);
+    	// Update the selected options that are displayed
+  		$select.trigger('change');
+
+  		jqueryValidate.renderSuccessToast(data.msg);
+
+		}).fail(function ( error ) {
+			if(error && error.msg && error.msg[0]) {
+				$input.closest('.form-group').addClass('has-error').focus();
+				$input.after('<small class="help-block">' + error.msg[0] + '</small>');	
+			}
+		})
+	})
+
 })

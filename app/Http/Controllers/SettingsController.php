@@ -27,7 +27,7 @@ class SettingsController extends Controller
 		$this->settings = new Settings();
         $this->setting_repo = new SettingsRepository();
 
-        \View::share('page_name_active', trans('message.settings_page'));
+        //\View::share('page_name_active', trans('message.settings_page'));
     }
     /**
      * Display a listing of the settings.

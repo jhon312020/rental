@@ -9,9 +9,8 @@
 @endsection
 
 @section('main-content')
-	<div class="container spark-screen">
 		<div class="row">
-			<div class="col-md-11">
+			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{trans('message.rent_lists')}}</div>
 					<div class="panel-body">
@@ -29,9 +28,10 @@
 										<thead>
 											<tr>
 												<td>{{trans('message.room_no')}}</td>
-												<td>{{trans('message.checkin_date')}}</td>
-												<td>{{trans('message.checkout_date')}}</td>
 												<td>{{trans('message.advance')}}</td>
+												<td>{{trans('message.max_persons_allowed')}}</td>
+												<td>{{trans('message.no_of_person_stayed')}}</td>
+												<td>{{trans('message.no_of_vacancy')}}</td>
 												<td>{{trans('message.actions')}}</td>
 											</tr>
 										</thead>
@@ -39,10 +39,10 @@
 											@foreach($rents as $key => $value)
 												<tr data-toggle="tooltip" data-title="Click row to view guest details" data-room-id="{{ $value->room_id }}" class="details-row">
 													<td>{{ $value->room_no }}</td>
-													<td>{{ $value->checkin_date }}</td>
-													<td>{{ $value->checkout_date }}</td>
 													<td>{{ $value->advance }}</td>
-
+													<td>{{ $value->max_persons_allowed }}</td>
+													<td>{{ $value->no_of_person_stayed }}</td>
+													<td>{{ $value->vacant }}</td>
 													<!-- we will also add show, edit, and delete buttons -->
 													<td>
 
@@ -70,5 +70,4 @@
 				</div>
 			</div>
 		</div>
-	</div>
 @endsection

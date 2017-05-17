@@ -32,7 +32,7 @@ class ExpensesController extends Controller
         $types = $this->expense_types_repo->allActive()->lists('type_of_expense', 'id')->toArray();
         $expense_types = array('' => 'Select') + $types;
 
-        \View::share(array('page_name_active' => trans('message.expenses_page'), 'expense_types' => $expense_types));
+        \View::share(['expense_types' => $expense_types]);
     }
     /**
      * Display a listing of the incomes.

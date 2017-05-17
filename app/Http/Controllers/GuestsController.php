@@ -25,7 +25,7 @@ class GuestsController extends Controller
 		$this->guests = new Guests();
         $this->guest_repo = new GuestsRepository();
 
-        \View::share('page_name_active', trans('message.guests'));
+        //\View::share('page_name_active', trans('message.guests'));
     }
     /**
      * Display a listing of the guests.

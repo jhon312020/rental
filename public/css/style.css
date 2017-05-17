@@ -530,3 +530,87 @@ body.rtl .formError .formErrorArrow {
   height: 85px;
   position: absolute;
 }
+.grid-select {
+  position: relative;
+  z-index: 9;
+  height: 35px;
+  width: 150px;
+}
+.add-types {
+  position: relative;
+  top: 2px;
+  left: 5px;
+  font-size: 20px;
+  cursor: pointer;
+  color: green;
+}
+.view-icon {
+  float: right;
+  font-size: 20px;
+  position: relative;
+  top: 8px;
+  cursor: pointer;
+  display: none;
+}
+.react-grid-Cell:hover > .view-icon {
+  display: block;
+}
+
+.side-nav-top {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.side-nav-top {
+    position: fixed;
+    width: 300px;
+    right: 0;
+    top: 0;
+    margin: 0;
+    transition: 0.5s;
+    font-size: 15px;
+    
+    background-color: #d3d3d3;
+    z-index: 999;
+    overflow-y: auto;
+}
+.side-nav-top li {
+    float: none;
+    line-height: 35px;
+}
+.side-nav-top li:not(:first-child) {
+  padding-left: 15px;
+  display: table;
+}
+.side-nav-top li span {
+  display: table-cell;
+}
+
+.side-nav-top .userView {
+    position: relative;
+    padding: 70px 32px 0;
+    margin-bottom: 8px;
+}
+.side-nav-top .userView .background {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    color: #fff;
+}
+.side-nav-top .userView>a {
+    height: auto;
+    padding: 0;
+    color: #fff;
+}
+.side-nav-top .userView .circle {
+    height: 64px;
+    width: 64px;
+}
+
+.side-nav-top .userView .circle, .side-nav-top .userView .name, .side-nav-top .userView .email {
+    display: block;
+}

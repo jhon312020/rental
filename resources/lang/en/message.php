@@ -89,6 +89,7 @@ return [
         'rent_monthly_report' => 'Monthwise rent report',
         'electric_bill_details_month' => 'Monthwise electric bill details',
         'room_rent_details_month' => 'Monthwise room rent details',
+        'no_of_vacancy' => 'No of vacancy',
         /* Rent page end */
 
         /* Setting page */

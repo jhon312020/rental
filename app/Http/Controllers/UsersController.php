@@ -27,7 +27,7 @@ class UsersController extends Controller
 		$this->users = new Users();
         $this->user_repo = new UsersRepository();
 
-        \View::share('page_name_active', trans('message.user_profile'));
+        //\View::share('page_name_active', trans('message.user_profile'));
     }
     /**
      * Display a listing of the users.

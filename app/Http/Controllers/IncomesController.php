@@ -32,7 +32,7 @@ class IncomesController extends Controller
         $types = $this->income_types_repo->allActive()->lists('type_of_income', 'id')->toArray();
         $income_types = array('' => 'Select') + $types;
 
-        \View::share(array('page_name_active' => trans('message.incomes_page'), 'income_types' => $income_types));
+        \View::share(['income_types' => $income_types]);
     }
     /**
      * Display a listing of the incomes.

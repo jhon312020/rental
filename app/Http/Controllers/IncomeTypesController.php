@@ -25,7 +25,7 @@ class IncomeTypesController extends Controller
 		$this->income_types = new IncomeTypes();
         $this->income_types_repo = new IncomeTypesRepository();
 
-        \View::share('page_name_active', trans('message.income_types'));
+        //\View::share('page_name_active', trans('message.income_types'));
     }
     /**
      * Display a listing of the income-types.

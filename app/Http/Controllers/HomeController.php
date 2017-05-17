@@ -57,7 +57,7 @@ class HomeController extends Controller
         $this->bill_repo = new ElectricityBillRepository();
         $this->income_repo = new IncomesRepository();
         $this->expense_repo = new ExpensesRepository();
-        \View::share('page_name_active', trans('message.home_page'));
+        //\View::share('page_name_active', trans('message.home_page'));
     }
 
     /**

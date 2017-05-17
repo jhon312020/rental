@@ -48,7 +48,7 @@ class Grid extends React.Component {
 		//console.log(props)
 	}
 
-	showInput (key, styles, tabIndex) {
+	showInput (eventName, key, styles, tabIndex, event) {
 
 		//console.log(key)
 		if(editable_header.indexOf(key) == -1) {
@@ -58,7 +58,22 @@ class Grid extends React.Component {
 			var defaultTop = parseInt(top);
 			var defaultLeft = parseInt(left);
 			var styles = { left : defaultLeft + 'px', top : defaultTop + 'px' };
-			const textValue = trData[key];
+
+			//const textValue = trData[key];
+			if(eventName == 'keyup') {
+				var stringvalue = String.fromCharCode(event.keyCode);
+				if(!(stringvalue.match(/^[0-9a-zA-Z]+$/))) {
+					return false;
+				}
+				if(stringvalue.trim()) {
+					var textValue = stringvalue;
+				} else {
+					return false;
+				}
+
+			} else {
+				var textValue = trData[key];	
+			}
 
 			//console.log(textValue)
 
@@ -151,6 +166,31 @@ class Grid extends React.Component {
 
   }
 
+  updateFocusStateInput (key, styles, tabIndex, rowIndex, columnIndex) {
+  	
+  	const nodes = { element : this.refs['reactGridCell_' + rowIndex +'_'+ columnIndex], index : columnIndex };
+  	this.props.onChangeParentFocus(nodes);
+
+  	if(editable_header.indexOf(key) == -1) {
+	  	var _this = this;
+			//console.log(key)
+			var trData = this.state.trData;
+			var top = styles.top.replace ( /[^\d.]/g, '' );
+			var left = styles.left.replace ( /[^\d.]/g, '' );
+			var defaultTop = parseInt(top);
+			var defaultLeft = parseInt(left);
+			var styles = { left : defaultLeft + 'px', top : defaultTop + 'px' };
+			
+			var node = this.refs['gridCell_' + key ];
+
+			
+			var textValue = trData[key];	
+			
+			_this.props.onChangeParentStyle(styles, key, _this.state.keyIndex, trData['styles']['max_height'], node, textValue, tabIndex);
+		}
+
+  }
+
   changeInput () {
   	
   }
@@ -232,7 +272,7 @@ class Grid extends React.Component {
 				 	headerStyle.width = increment + 'px';
 
 				  	return (	
-				  		<div tabIndex={tabIndex} className="react-grid-Cell" style={headerStyle} key={index} onDoubleClick={this.showInput.bind(this, key, headerStyle, tabIndex + 1)} onFocus={this.updateFocusState.bind(this, trIndex, index)} ref={"reactGridCell_" + trIndex + '_' +  index}>
+				  		<div tabIndex={tabIndex} className="react-grid-Cell" style={headerStyle} key={index} onDoubleClick={this.showInput.bind(this, 'dblclik', key, headerStyle, tabIndex + 1)} onFocus={this.updateFocusStateInput.bind(this, key, headerStyle, tabIndex + 1, trIndex, index)} onKeyUp={this.showInput.bind(this, 'keyup', key, headerStyle, tabIndex + 1)} ref={"reactGridCell_" + trIndex + '_' +  index}>
 					      <div className="react-grid-Cell__value">
 					      	
 					         <span>
@@ -256,7 +296,7 @@ class Guest extends React.Component {
 	
 	constructor(props, context) {
 		super(props, context);
-		this.state = { grid : data, containerWidth : 0, textAreaStyle : {left : '0px', top : '0px', height : 'auto', minHeight : '0px'}, isShowTextArea : false, key : null, index : null, minHeight : '0px', domNode : null, textInputValue : null, tabIndex : 0, nextId : null, dateFormat : dateFormat, billInput : billInput, changeIcon : true, isErrorInput : true, errorSpanStyle : {left : '0px', top : '0px', height : 'auto', position : "absolute", zIndex : 9, width : "150px", background : "red", color : "#fff" }, errorSpanText : null , isActive : "current", trash : inactiveBillData };
+		this.state = { grid : data, containerWidth : 0, textAreaStyle : {left : '0px', top : '0px', height : 'auto', minHeight : '0px'}, isShowTextArea : false, key : null, index : null, minHeight : '0px', domNode : null, textInputValue : null, tabIndex : 0, nextId : null, dateFormat : dateFormat, billInput : billInput, changeIcon : true, isErrorInput : true, errorSpanStyle : {left : '0px', top : '0px', height : 'auto', position : "absolute", zIndex : 9, width : "150px", background : "red", color : "#fff" }, errorSpanText : null , isActive : "current", trash : inactiveBillData, textVisible : false };
 
 
 		this.isTabbed = false;
@@ -385,54 +425,52 @@ class Guest extends React.Component {
 
 	_handleKeyDown (event) {
 		
+		if(this.focusElement && !this.state.textVisible) {
+	  	const keyCode = event.keyCode || event.which;
+	  	const rowsAndCols = this.focusElement;
+	  	
+	  	//console.log(rowsAndCols)
+	  	switch( keyCode ) {
+	    		//Left arrow
+	        case 37:
+	        	this.setState({ isShowTextArea : false });
+	          const prevColumn = $(rowsAndCols.node.element).prev();
+	        	if(prevColumn.length) {
+	        		prevColumn.focus();
+	        	}
+	          break;
+	        //Up arrow
+	        case 38:
+						this.setState({ isShowTextArea : false });	        	
+	        	const prevRow = $(rowsAndCols.node.element).closest('.react-grid-Row').prev();
+	        	
+	        	if(prevRow.length) {
+	        		prevRow.find('div.react-grid-Cell').eq(rowsAndCols.node.index).focus();
+	        	}
 
-		if(this.focusElement) {
-			
-  	const keyCode = event.keyCode || event.which;
-  	const rowsAndCols = this.focusElement;
-  	//console.log(rowsAndCols)
-  	switch( keyCode ) {
-    		//Left arrow
-        case 37:
-
-          const prevColumn = $(rowsAndCols.node.element).prev();
-        	if(prevColumn.length) {
-        		prevColumn.focus();
-        	}
-          
-          break;
-        //Up arrow
-        case 38:
-        	
-        	const prevRow = $(rowsAndCols.node.element).closest('.react-grid-Row').prev();
-        	
-        	if(prevRow.length) {
-        		prevRow.find('div.react-grid-Cell').eq(rowsAndCols.node.index).focus();
-        	}
-
-          break;
-         //Right arrow
-        case 39:
-          
-          const nextColumn = $(rowsAndCols.node.element).next();
-        	if(nextColumn.length) {
-        		nextColumn.focus();
-        	}
-          break;
-         //Down arrow
-        case 40:
-
-          const nextRow = $(rowsAndCols.node.element).closest('.react-grid-Row').next();
-        	
-        	if(nextRow.length) {
-        		nextRow.find('div.react-grid-Cell').eq(rowsAndCols.node.index).focus();
-        	}
-          
-          break;
-        default: 
-        		
-            break;
-    }
+	          break;
+	         //Right arrow
+	        case 39:
+	          this.setState({ isShowTextArea : false });
+	          const nextColumn = $(rowsAndCols.node.element).next();
+	        	if(nextColumn.length) {
+	        		nextColumn.focus();
+	        	}
+	          break;
+	         //Down arrow
+	        case 40:
+	        	this.setState({ isShowTextArea : false });
+	          const nextRow = $(rowsAndCols.node.element).closest('.react-grid-Row').next();
+	        	
+	        	if(nextRow.length) {
+	        		nextRow.find('div.react-grid-Cell').eq(rowsAndCols.node.index).focus();
+	        	}
+	          
+	          break;
+	        default: 
+	        		
+	            break;
+	    }
   	}
 	}
 
@@ -533,7 +571,7 @@ class Guest extends React.Component {
 
 			var node = this.refs.myRef;
 
-			$(node).val(textInputValue).focus();
+			$(node).val('').focus();
 
 		});
 		
@@ -543,6 +581,9 @@ class Guest extends React.Component {
     	textStyles.top = styles.top;
     	textStyles.minHeight = max_height + 'px';
     	textStyles.height = max_height + 'px';
+    	textStyles.background = 'transparent';
+    	textStyles.color = 'transparent';
+			textStyles.textShadow = '0 0 0 #000';
 
     var keyIndex = 0;
 
@@ -674,6 +715,21 @@ class Guest extends React.Component {
 	   	var isValid = this.checkInputValid(node.value);
 
 	   	//console.log(isValid);
+	   	if(!this.state.textVisible) {
+	   		if(isNext) {
+					var _this = this;
+					setTimeout( function () {
+
+						_this.isTabbed = false;
+						//_this.setState({ isShowTextArea : false });
+
+					}, 10);
+
+				} else {
+					this.setState({ isShowTextArea : false });
+				}
+	   		return false;
+	   	}
 
 	   	if(isValid.valid) {
 		   	var index = this.state.index;
@@ -706,12 +762,12 @@ class Guest extends React.Component {
 							setTimeout( function () {
 
 								_this.isTabbed = false;
-								_this.setState({ isShowTextArea : false });
+								_this.setState({ isShowTextArea : false, textVisible : false });
 
 							}, 10);
 
 						} else {
-							_this.setState({ isShowTextArea : false });
+							_this.setState({ isShowTextArea : false, textVisible : false });
 						}
 
 
@@ -732,10 +788,35 @@ class Guest extends React.Component {
 
    }
 
+  showTextAsInput ( event ) {
+  	var val = $(event.target).val();
+  	//console.log(val, val.length)
+  	if(!this.state.textVisible && val.trim().length) {
+  		this.setState({ textVisible : true });
+  		var styles = this.state.textAreaStyle;
+			
+			styles.background = '';
+			styles.color = '#000';
+			styles.textShadow = '';
+			
+			this.setState({ textAreaStyle : styles });
+
+  	}
+
+  	if(!this.state.textVisible && !val.trim().length) {
+  		$(event.target).val('');
+  	}
+  }
+  
 	autoResize (event) {
 		var node = this.refs.myRef;
 		var _this = this;
 		var key = event.which || event.KeyCode;
+
+		var val = $(event.target).val();
+		if(!this.state.textVisible && !val.length) {
+  		return false;
+  	}
 
 		//Enter key presses.
 		if(key == 13) {
@@ -776,6 +857,9 @@ class Guest extends React.Component {
 			styles.height = 'auto';
 			_this.setState({ textAreaStyle : styles });
 			styles.height = node.scrollHeight + 'px';
+			styles.background = '';
+			styles.color = '#000';
+			styles.textShadow = '';
 			//console.log(styles)
 			_this.setState({ textAreaStyle : styles });
 			//node.style.cssText = 'height:' + node.scrollHeight + 'px';
@@ -881,6 +965,27 @@ class Guest extends React.Component {
 		}
 	}
 
+	showTextarea () {
+		if(!this.state.textVisible) {
+			const textNode = this.refs.myRef;
+			//console.log(this.state.textInputValue)
+			$(textNode).val(this.state.textInputValue);
+			var styles = this.state.textAreaStyle;
+			styles.background = '';
+			styles.color = '#000';
+			styles.textShadow = '';
+			this.setState({ textAreaStyle : styles, textVisible : true });
+		}
+	}
+
+	textPaste (event) {
+		if(!this.state.textVisible) {
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		}
+	}
+
 	render() {
 		//console.log('render');
 		var left = 30;
@@ -978,7 +1083,7 @@ class Guest extends React.Component {
 			         <div tabIndex="0">
 			            <div className="react-grid-Viewport" style={{"padding" : "0" , "bottom" : "0" , "left" : "0" , "right" : "0" , "overflowX" : "hidden" , "overflowY" : "scroll", "position" : "absolute" , "top" : "35px"}}>
 				            { this.state.isShowTextArea && <span>
-									<textarea tabIndex={this.state.tabIndex} name="test" className="form-control text-area" defaultValue={this.state.textInputValue} ref="myRef" onKeyDown={this.autoResize.bind(this)} style={this.state.textAreaStyle} onBlur={this.updateRow.bind(this)} />
+									<textarea tabIndex={this.state.tabIndex} name="test" className="form-control text-area" defaultValue={this.state.textInputValue} ref="myRef" onKeyDown={this.autoResize.bind(this)} style={this.state.textAreaStyle} onPaste={this.textPaste.bind(this)} onDoubleClick={this.showTextarea.bind(this)} onBlur={this.updateRow.bind(this)} onChange={this.showTextAsInput.bind(this)} />
 								</span>
 								}
 								{ this.state.isErrorInput && 

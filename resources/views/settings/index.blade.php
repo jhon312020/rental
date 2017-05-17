@@ -9,9 +9,8 @@
 @endsection
 
 @section('main-content')
-	<div class="container spark-screen">
 		<div class="row">
-			<div class="col-md-11">
+			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{trans('message.setting_update')}}</div>
 					<div class="panel-body">
@@ -56,5 +55,4 @@
 				</div>
 			</div>
 		</div>
-	</div>
 @endsection

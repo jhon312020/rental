@@ -46,7 +46,7 @@
             ?>
             @foreach($parent_menus as $menu_lists)
                 @if(!$menu_lists['is_child'])
-                <li class="@if(isset($page_name_active) && $page_name_active==$menu_lists['menu_name'])active @endif">
+                <li>
                     <a href="{{ URL::to($menu_lists['menu_link']) }}"><i class="fa fa-{{$menu_lists['menu_icon']}}"></i> <span>{{ $menu_lists['menu_name'] }}</span></a>
                 </li>
                 @else

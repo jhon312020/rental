@@ -11,6 +11,10 @@ class IncomeTypes extends Model
 			[
 				"type_of_income" => 'required|unique:income_types,type_of_income',
 			];
+		private $ajax_rules = 
+			[
+				"type_of_income" => 'required|unique:income_types,type_of_income',
+			];
 	/**
    * Validation all necessary fields.
    *
@@ -33,6 +37,33 @@ class IncomeTypes extends Model
 			{
 					// set errors and return false
 					$this->errors = $v;
+					return false;
+			}
+			// validation pass
+			return true;
+    }
+    /**
+   * Validation all necessary fields.
+   *
+   * @param  Array  $data
+   * @return Response Bool
+  */
+	public function ajaxValidate($data)
+  {
+  		if(isset($data['id'])) {
+				$this->ajax_rules['type_of_income'] = $this->rules['type_of_income'].','.$data['id'].',id,is_active,1';
+			} else {
+				$this->ajax_rules['type_of_income'] = $this->rules['type_of_income'].',NULL,id,is_active,1';
+			}
+	    // make a new validator object
+			$v = \Validator::make($data, $this->rules);
+		
+			$this->post = $data;
+			// check for failure
+			if ($v->fails())
+			{
+					// set errors and return false
+					$this->errors = $v->errors()->all();
 					return false;
 			}
 			// validation pass
@@ -65,6 +96,28 @@ class IncomeTypes extends Model
 			} else {
 				$this->insert($data);
 				\Session::flash('message', trans('message.income_type_update_success'));
+				$last_id = $this->id;
+			}
+			return $last_id;
+		}
+
+		/**
+     * Insert or update the record.
+     *
+     * @param  Array $data
+     * @return Response
+     */
+		public function ajaxInsertOrUpdate($data) {
+			$form_data = [ 'type_of_income' => $data['category'] ];
+			if(isset($data['id'])) {
+				$form_data['id'] = $data['id'];
+				
+				$this->where('id', $id)->update($form_data);
+				$last_id = $id;
+			} else {
+				$this->type_of_income = $data['category'];
+				$this->save();
+				
 				$last_id = $this->id;
 			}
 			return $last_id;

@@ -1,3 +1,6 @@
+<script>
+var functionalKeys = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123];
+</script>
 <!-- Main Footer -->
 <footer class="main-footer">
     <!-- To the right -->
