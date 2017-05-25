@@ -115,6 +115,7 @@
               get_rent_by_room_no : "{{action('AjaxController@getRentByRoomNo')}}",
               create_income_type : "{{action('AjaxController@createIncomeType')}}",
               create_expense_type : "{{ action('AjaxController@createExpenseType')}}",
+              create_new_income : "{{ action('AjaxController@createNewIncome') }}"
           };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

@@ -817,4 +817,25 @@ class AjaxController extends Controller
           return response()->json(['errors' => 'Invalid', 'msg' => $errors, 'status' => 400], 400);          
         }
     }
+
+    /**
+     * create the new income.
+     *
+     * @param  
+     * @return Response
+    */
+    public function createNewIncome (Request $request) {
+      $post_params = $request->all();
+      $post_params['date_of_income'] = date('d/m/Y');
+      
+      if ($this->incomes->validate($post_params)) {
+        $id = $this->incomes->insertOrUpdate($post_params);
+
+        return response()->json([ 'success' => true, 'msg' => 'New income created successfully!', 'id' => $id]);
+
+      } else {
+        $errors = $this->incomes->errors();
+        return response()->json(['errors' => 'Invalid', 'msg' => $errors, 'status' => 400], 400);          
+      }
+    }
 }

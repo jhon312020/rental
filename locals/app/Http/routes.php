@@ -112,4 +112,5 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/get-rent-by-room-no', 'AjaxController@getRentByRoomNo');
 	Route::post('/create-income-type', 'AjaxController@createIncomeType');
 	Route::post('/create-expense-type', 'AjaxController@createExpenseType');
+	Route::post('/create-new-income', 'AjaxController@createNewIncome');
 });

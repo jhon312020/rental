@@ -76,7 +76,7 @@
 									</div>
 								</div>
 
-								<div class="panel panel-default">
+								<!-- <div class="panel panel-default">
 								   <div class="panel-heading p-head" data-parent="#accordion" data-toggle="collapse" data-target="#collapse1">
 								      <h4 class="panel-title">
 								         {{trans('message.electric_bill_details_month')}}
@@ -95,7 +95,7 @@
 										     </div>
 										  </div>
 										</div>
-								</div>
+								</div> -->
 								
 
 							</div>
@@ -108,14 +108,14 @@
 	
 	<script type="text/javascript">
 		var rentData = <?php echo json_encode($rent_monthly); ?>;
-		var billData = <?php echo json_encode($bill_monthly); ?>;
+		//var billData = <?php echo json_encode($bill_monthly); ?>;
 		var trashRentData = <?php echo json_encode($inactive_rent_monthly); ?>;
-		var trashBillData = <?php echo json_encode($inactive_bill_monthly); ?>;
+		//var trashBillData = <?php echo json_encode($inactive_bill_monthly); ?>;
 		var dateMonth = '<?php echo $date_month; ?>';
 		var nextMonth = '<?php echo $next_month; ?>';
 		var rooms = <?php echo json_encode($rooms); ?>;
 		console.log(nextMonth)
 	</script>
 	<script type="text/babel" src="{{ asset('plugins/react/rent/rent_month.jsx') }}"></script>
-	<script type="text/babel" src="{{ asset('plugins/react/rent/electricity_bill_month.jsx') }}"></script>
+	<!-- <script type="text/babel" src="{{ asset('plugins/react/rent/electricity_bill_month.jsx') }}"></script> -->
 @endsection
