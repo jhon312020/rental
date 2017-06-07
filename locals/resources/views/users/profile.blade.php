@@ -34,13 +34,13 @@
 										@endif
 								</div>
 
-									<div class="form-group form-top {{ $errors->has('password')? 'has-error': '' }}">
+									<!--<div class="form-group form-top {{ $errors->has('password')? 'has-error': '' }}">
 											{{ Form::label('password', trans('message.password')) }}
 											{{ Form::password('password', array('class' => 'form-control')) }}
 											@if ($errors->has('password'))
 											<small class="help-block">{{ $errors->first('password') }}</small>
 											@endif
-									</div>
+									</div>-->
 
 									<div class="row form-top">
 										<div class="col-sm-12">
@@ -64,8 +64,5 @@
 @endsection
 <script type="text/javascript">
 var avatar = "{{$user->avatar}}";
-if(avatar) {
-	var file_path = "{{ asset('/images/'.Auth::User()->id.'/'.$user->avatar) }}";
-	
-}
+var file_path = "{{ $default_avatar }}";
 </script>

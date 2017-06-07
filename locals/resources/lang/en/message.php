@@ -86,10 +86,14 @@ return [
         'guest_details' => 'Guest details',
         'add_another_guest' => 'Add another guest',
         'rent_monthly' => 'Monthwise rent',
+        'bill_monthly' => 'Monthwise electricity bill',
         'rent_monthly_report' => 'Monthwise rent report',
+        'bill_monthly_report' => 'Monthwise electricity bill report',
         'electric_bill_details_month' => 'Monthwise electric bill details',
         'room_rent_details_month' => 'Monthwise room rent details',
         'no_of_vacancy' => 'No of vacancy',
+        'electricity_amount' => 'Electricity amount',
+        'pending_amount' => 'Pending amount',
         /* Rent page end */
 
         /* Setting page */
@@ -111,6 +115,7 @@ return [
         'yearly_electricity_bill_report' => 'Yearly electricity bill report',
         'electricity_bill_report_between_months' => 'Electricity bill report between months',
         'billing_month_year' => 'Billing month year',
+        'total_amount' => 'Total amount',
         /* Report page end */
 
         /*Dashboars start*/
@@ -122,6 +127,16 @@ return [
         'paid_guests_list' => 'Paid guests list',
         'unpaid_guests_list' => 'Unpaid guests list',
         /*Dashboard end*/
+
+        /*message page start*/
+        'nondelivered_messages' => 'Non-delivered messages',
+        'delivered_messages' => 'Delivered messages',
+        'messages' => 'Messages',
+        /*message page end*/
+
+        /*user page start*/
+        'change_password' => 'Change password',
+        /*user page end*/
 
     /* page title end */
 
@@ -180,6 +195,10 @@ return [
         /* Setting start */
         'setting_update_success' => 'Setting updated successfully!',
         /* Setting end */
+
+        /* User start */
+        'user_update_password_success' => 'Password updated successfully!',
+        /* User end */
 
     /* Success and error messages end */
 
@@ -247,7 +266,18 @@ return [
         'title' => 'Title',
         'electricity_bill_units' => 'Electricity bill per units',
         'admin_email' => 'Admin email',
+        'small_title' => 'Small title',
         /* Setting label end */
+
+        /* message label end */
+        'message' => 'Message',
+        'error' => 'Error',
+        /* message label end */   
+
+        /* User label end */
+        'new_password' => 'New password',
+        'confirm_password' => 'Confirm password',
+        /* User label end */        
 
     /* label name end */
 
@@ -307,7 +337,17 @@ return [
         'updatesetting' => 'Update the setting!',
         /* Setting label end*/
 
+        /* User button label start*/
+        'update_password' => 'Update password!',
+        /* User label end*/
+
     /* Button text end */
+
+    /*Error page result*/
+    'access_denied' => 'Access denied',
+    '403error' => '403 Error',
+    'access_denied_page' => "You don't have right to access this page",
+    /*Error page result*/
 
 
     /* Coomon buttons start */

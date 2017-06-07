@@ -4,6 +4,8 @@ namespace App;
 
 use Auth;
 
+use App\RentIncomes;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Incomes extends Model
@@ -36,6 +38,49 @@ class Incomes extends Model
 			}
 			// validation pass
 			return true;
+    }
+
+    /**
+   * Ajax validation all necessary fields.
+   *
+   * @param  Array  $data
+   * @return Response Bool
+  */
+    public function ajaxValidate($data)
+  {
+          // make a new validator object
+            $v = \Validator::make($data, $this->rules);
+        
+            $this->post = $data;
+            // check for failure
+            if ($v->fails())
+            {
+                    // set errors and return false
+                    $this->errors = $v->errors()->all();;
+                    return false;
+            }
+            // validation pass
+            return true;
+    }
+    /**
+    * Rent income validation for amount.
+    *
+    * @param  Array  $data
+    * @return Response Bool
+    */
+    public function rentValidate($data)
+    {
+        $rent_incomes = new RentIncomes();
+        $error = [ "error" => false ];
+        $income = $this->select(\DB::raw("SUM(amount) as amount"))->where([ "rent_id" => $data['rent_id'], 'income_type' => \DB::raw(\Config::get('constants.RENT')), 'is_active' => 1 ])->first();
+        $rent_income = $rent_incomes->select(\DB::raw("SUM(amount + electricity_amount) as amount"))->where([ "rent_id" => $data['rent_id'], 'is_active' => 1 ])->first();
+        if ($rent_income->amount < $income->amount + $data['amount']) {
+            $error['error'] = true;
+            $error['msg'] = "The amount shoul less than or equal to ".($rent_income->amount - $income->amount);
+            return $error;
+        }
+        // validation pass
+        return $error;
     }
     /**
      * Revert back if any errors after validation.

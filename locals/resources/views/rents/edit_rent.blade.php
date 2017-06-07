@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-	{{trans('message.rent_create')}}
+	{{trans('message.rent_update')}}
 @endsection
 
 @section('contentheader_title')
-	{{trans('message.rent_create')}}
+	{{trans('message.rent_update')}}
 @endsection
 
 @section('main-content')
@@ -30,7 +30,7 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.rent_create')}}</div>
+					<div class="panel-heading">{{trans('message.rent_update')}}</div>
 					<div class="panel-body">
 						<div class="col-sm-12">
 							<!-- if there are creation errors, they will show here-->

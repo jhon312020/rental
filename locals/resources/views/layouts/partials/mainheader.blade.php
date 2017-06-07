@@ -4,9 +4,9 @@
     <!-- Logo -->
     <a href="{{ url('/home') }}" class="logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
-        <span class="logo-mini"><b>R</b>T</span>
+        <span class="logo-mini"><b>{{$setting['small_title']}}</b></span>
         <!-- logo for regular state and mobile devices -->
-        <span class="logo-lg"><b>Rent</b>LTE </span>
+        <span class="logo-lg"><b>{{$setting['title']}}</b> </span>
     </a>
 
     <!-- Header Navbar -->
@@ -119,14 +119,14 @@
                         <!-- Menu Toggle Button -->
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <!-- The user image in the navbar-->
-                            <img src="{{asset('/img/user2-160x160.jpg')}}" class="user-image" alt="User Image"/>
+                            <img src="{{$default_avatar}}" class="user-image" alt="User Image"/>
                             <!-- hidden-xs hides the username on small devices so only the image appears. -->
                             <span class="hidden-xs">{{ Auth::user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu">
                             <!-- The user image in the menu -->
                             <li class="user-header">
-                                <img src="{{asset('/img/user2-160x160.jpg')}}" class="img-circle" alt="User Image" />
+                                <img src="{{$default_avatar}}" class="img-circle" alt="User Image" />
                                 <p>
                                     {{ Auth::user()->name }}
                                     <!--<small>{{ trans('adminlte_lang::message.login') }} Nov. 2012</small>-->

@@ -42,11 +42,18 @@ class IncomesController extends Controller
     public function index()
     {
         // get all the nerds
-        $incomes = $this->income_repo->allActive();
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+
+        //Create the current month electric bills details.
+        $incomes = $this->income_repo->getIncomesReportBetweenDates($start_date, $end_date);
+        $total_incomes = $this->income_repo->getTotalIncomesByDates($start_date, $end_date);
+
+        //$incomes = $this->income_repo->allActive();
 
         // load the view and pass the nerds
         return view('incomes.index')
-            ->with(array('incomes' => $incomes));
+            ->with(array('incomes' => $incomes, 'start_date' => $start_date, 'end_date' => $end_date, 'total_incomes' => $total_incomes->amount ));
     }
 	/**
      * Show the form for creating a new resource.

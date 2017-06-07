@@ -463,7 +463,7 @@ body.rtl .formError .formErrorArrow {
     height: -moz-calc(100%);
     padding-bottom: 60px;
     background-color: #d3d3d3;
-    z-index: 999;
+    z-index: 9999;
     overflow-y: auto;
 }
 .side-nav li {
@@ -480,7 +480,7 @@ body.rtl .formError .formErrorArrow {
 
 .side-nav .userView {
     position: relative;
-    padding: 70px 32px 0;
+    padding: 30px 32px 0;
     margin-bottom: 8px;
 }
 .side-nav .userView .background {
@@ -570,8 +570,8 @@ body.rtl .formError .formErrorArrow {
     transition: 0.5s;
     font-size: 15px;
     
-    background-color: #d3d3d3;
-    z-index: 999;
+    background-color: #f8f8f8;
+    z-index: 99999;
     overflow-y: auto;
 }
 .side-nav-top li {
@@ -613,4 +613,29 @@ body.rtl .formError .formErrorArrow {
 
 .side-nav-top .userView .circle, .side-nav-top .userView .name, .side-nav-top .userView .email {
     display: block;
+}
+
+.lastest-rent-table thead tr th, .lastest-rent-table {
+  text-align: center;
+  margin-top: 15px;
+  background: #fff;
+}
+.add-rent-label {
+  width: 100%;
+  text-align: center;
+  background: #5bc0de!important;
+  color: #fff;
+}
+.label-li {
+  margin-top: 15px;
+}
+textarea {
+  resize: none;
+}
+.side-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 9999;
+  display: none;
 }

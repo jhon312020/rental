@@ -93,10 +93,10 @@
 		               <div class="row text-center">
 								    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="total_amount_date">{{ $total_expenses_between_date }}</span></span></p>
 									</div>
-		              </div>
-		              
-		             </div>
-					    </div>
+	              </div>
+	              
+	             </div>
+				    </div>
 						
 						<div class="row">
 							<div class="col-sm-12">

@@ -44,6 +44,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
+        //echo bcrypt('rental');die;
         $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
     }
 

@@ -125,7 +125,7 @@ class RentsRepository
     public function getGuestDetailsForRoom ($data)
     {
 
-        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no', 'rents.id as rent_id', 'guests.id as guest_id', 'rents.is_incharge', 'rents.rent_amount')
+        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no', 'rents.id as rent_id', 'guests.id as guest_id', 'rents.is_incharge', 'rents.rent_amount', 'rents.incharge_set')
                     ->join('users', 'users.id', '=', 'rents.user_id', 'left')
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
@@ -148,7 +148,7 @@ class RentsRepository
     public function getAllGuestDetails ()
     {
 
-        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no', 'rents.id as rent_id', 'guests.id as guest_id', 'rents.is_incharge')
+        return Rents::select('rents.id', 'rents.room_id', 'rents.guest_id', 'rents.checkin_date', 'rents.checkout_date', 'rents.user_id', 'users.name as entry_by', 'rooms.room_no', 'incomes.amount as advance', 'incomes.id as income_id', 'incomes.rent_amount_received as is_amount_received', 'guests.name', 'guests.email', 'guests.mobile_no', 'rents.id as rent_id', 'guests.id as guest_id', 'rents.is_incharge', 'rents.incharge_set')
                     ->join('users', 'users.id', '=', 'rents.user_id', 'left')
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
@@ -180,7 +180,9 @@ class RentsRepository
 
       $first_date = $year.'-'.$month.'-01';
 
-        $query = RentIncomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'rent_incomes.id', 'rent_incomes.amount', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+      $next_month_date = date('Y-m-d', strtotime($date, strtotime("+1 month")));
+
+        $query = RentIncomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'rent_incomes.id', 'rent_incomes.amount', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 'rent_incomes.electricity_amount', 
           \DB::raw('
               IF(tbl_rents.checkout_date is null, 
                 IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
@@ -194,35 +196,36 @@ class RentsRepository
                       DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
 
                     as no_of_days_stayed'), 
-                  \DB::raw('
+                  /*\DB::raw('
                       IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > tbl_rent_incomes.amount, 
                         tbl_rent_incomes.amount, 
                       IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) <= 0,
                         0, (SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)))) as pending_amount')
-                  )
+                  )*/
+                    \DB::raw('IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) < 0, 
+                                IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > 0,
+                                  IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                                   0),
+                                tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount)
+                                as pending_amount'))
                     ->join('rents', 'rents.id', '=', 'rent_incomes.rent_id', 'left')
+                    
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) <= '".$first_date."' group by rent_id) tbl_rt"), "rt.rent_id", "=", "rents.id")
 
-                    ->leftjoin('rent_incomes as rt', function($join)
-                     {
-                         $join->on('rt.rent_id', '=', 'rents.id')
-                            ->on('rt.is_active', '=', \DB::raw('1'));
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) >= '".$next_month_date."' group by rent_id) tbl_rt1"), "rt1.rent_id", "=", "rents.id")
 
-                     })
-                    ->leftjoin('incomes', function($join)
-                     {
-                         $join->on('incomes.rent_id', '=', 'rents.id')
-                            ->on('incomes.income_type', '=', \DB::raw(\Config::get('constants.RENT')));
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rents.id")
 
-                     })
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
                     ->where(array('rent_incomes.is_active' => 1))
                     ->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
-                    ->groupBy('rt.rent_id', 'incomes.rent_id');
+                    ->groupBy('rt.rent_id', 'rt1.rent_id', 'incomes.rent_id');
                     //echo $query->toSql();die;
         if($room_id != 0) {
           $query->where('rents.room_id', $room_id);
         }
+        //echo $query->get();die;
         return $query->get();
     }
 
@@ -243,8 +246,9 @@ class RentsRepository
 
         $first_date = $year.'-'.$month.'-01';
 
-        $query = Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date')
-          , 
+        $next_month_date = date('Y-m-d', strtotime($date, strtotime("+1 month")));
+
+         $query = RentIncomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'rent_incomes.id', 'rent_incomes.amount', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 'rent_incomes.electricity_amount', 
           \DB::raw('
               IF(tbl_rents.checkout_date is null, 
                 IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
@@ -257,14 +261,33 @@ class RentsRepository
                       DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
                       DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
 
-                    as no_of_days_stayed'))
+                    as no_of_days_stayed'), 
+                  /*\DB::raw('
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > tbl_rent_incomes.amount, 
+                        tbl_rent_incomes.amount, 
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) <= 0,
+                        0, (SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)))) as pending_amount')
+                  )*/
+                    \DB::raw('IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) < 0, 
+                                IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > 0,
+                                  IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                                   0),
+                                tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount)
+                                as pending_amount'))
+                    ->join('rents', 'rents.id', '=', 'rent_incomes.rent_id', 'left')
+                    
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) <= '".$first_date."' group by rent_id) tbl_rt"), "rt.rent_id", "=", "rents.id")
 
-                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rents.id")
+
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) >= '".$next_month_date."' group by rent_id) tbl_rt1"), "rt1.rent_id", "=", "rents.id")
+
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
-                    ->where(array('incomes.is_active' => 0, 'incomes.income_type' => \Config::get('constants.RENT')))
-                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year]);
-        
+                    ->where(array('rent_incomes.is_active' => 0))
+                    ->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
+                    ->groupBy('rt.rent_id', 'rt1.rent_id', 'incomes.rent_id');
+                    //echo $query->toSql();die;
         if($room_id != 0) {
           $query->where('rents.room_id', $room_id);
         }
@@ -327,7 +350,9 @@ class RentsRepository
 
       $first_date = $year.'-'.$month.'-01';
 
-        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+      $next_month_date = date('Y-m-d', strtotime($date, strtotime("+1 month")));
+
+        return RentIncomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'rent_incomes.id', 'rent_incomes.amount', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 'rent_incomes.electricity_amount', 
           \DB::raw('
               IF(tbl_rents.checkout_date is null, 
                 IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
@@ -340,14 +365,38 @@ class RentsRepository
                       DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
                       DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
 
-                    as no_of_days_stayed'))
+                    as no_of_days_stayed'), 
+                  /*\DB::raw('
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > tbl_rent_incomes.amount, 
+                        tbl_rent_incomes.amount, 
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) <= 0,
+                        0, (SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)))) as pending_amount')
+                  )*/
+                    \DB::raw('IF((tbl_rt.amount - 
+                                IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > (tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount), 
+                                  tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount, 
+                                  IF(tbl_rt1.amount is not null, 
+                                    IF(tbl_rt.amount - tbl_rt1.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0) > 0,
+                                      tbl_rt.amount - tbl_rt1.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                                      0
+                                    ),
+                                    tbl_rt.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)
+                                  )
+                              )  as pending_amount'))
+                    ->join('rents', 'rents.id', '=', 'rent_incomes.rent_id', 'left')
+                    
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 group by rent_id) tbl_rt"), "rt.rent_id", "=", "rents.id")
 
-                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rents.id")
+
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) >= '".$next_month_date."' group by rent_id) tbl_rt1"), "rt1.rent_id", "=", "rents.id")
+
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
-                    ->where(array('incomes.is_active' => 1, 'incomes.rent_amount_received' => 1, 'incomes.income_type' => \Config::get('constants.RENT')))
-                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
-                    ->get();
+                    ->where(array('rent_incomes.is_active' => 1))
+                    ->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
+                    ->having('pending_amount', '=', 0)
+                    ->groupBy('rt.rent_id', 'incomes.rent_id')->get();
     }
 
     /**
@@ -367,7 +416,9 @@ class RentsRepository
 
       $first_date = $year.'-'.$month.'-01';
 
-        return Incomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'incomes.id', 'incomes.amount', 'incomes.rent_amount_received', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 
+      $next_month_date = date('Y-m-d', strtotime($date, strtotime("+1 month")));
+
+        return RentIncomes::select('guests.name', 'rents.id as rent_id', 'guests.email', 'guests.mobile_no', 'guests.city', 'rent_incomes.id', 'rent_incomes.amount', 'rooms.room_no', 'guests.id as guest_id', \DB::raw('DATE_FORMAT(tbl_rents.checkin_date, "%d/%m/%Y") as checkin_date'), 'rent_incomes.electricity_amount', 
           \DB::raw('
               IF(tbl_rents.checkout_date is null, 
                 IF(MONTH(tbl_rents.checkin_date) = "'.$month.'" AND YEAR(tbl_rents.checkin_date) = "'.$year.'", 
@@ -380,15 +431,75 @@ class RentsRepository
                       DATEDIFF(DATE("'.$date.'"), tbl_rents.checkin_date),
                       DATEDIFF(DATE("'.$date.'"), DATE("'.$first_date.'"))))) + 1 
 
-                    as no_of_days_stayed'))
+                    as no_of_days_stayed'), 
+                  /*\DB::raw('
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > tbl_rent_incomes.amount, 
+                        tbl_rent_incomes.amount, 
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) <= 0,
+                        0, (SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)))) as pending_amount')
+                  )*/
+                    \DB::raw('IF((tbl_rt.amount - 
+                                IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > (tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount), 
+                                  tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount, 
+                                  IF(tbl_rt1.amount is not null, 
+                                    IF(tbl_rt.amount - tbl_rt1.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0) > 0,
+                                      tbl_rt.amount - tbl_rt1.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                                      0
+                                    ),
+                                    tbl_rt.amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)
+                                  )
+                              )  as pending_amount'))
+                    ->join('rents', 'rents.id', '=', 'rent_incomes.rent_id', 'left')
+                    
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 group by rent_id) tbl_rt"), "rt.rent_id", "=", "rents.id")
 
-                    ->join('rents', 'rents.id', '=', 'incomes.rent_id', 'left')
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) >= '".$next_month_date."' group by rent_id) tbl_rt1"), "rt1.rent_id", "=", "rents.id")
+
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rents.id")
+
                     ->join('guests', 'guests.id', '=', 'rents.guest_id', 'left')
                     ->join('rooms', 'rooms.id', '=', 'rents.room_id', 'left')
-                    ->where(array('incomes.is_active' => 1, 'incomes.rent_amount_received' => 0, 'incomes.income_type' => \Config::get('constants.RENT')))
-                    ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? and YEAR(tbl_incomes.date_of_income) = ?', [$month, $year])
-                    ->get();
+                    ->where(array('rent_incomes.is_active' => 1))
+                    ->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
+                    ->having('pending_amount', '>', 0)
+                    ->groupBy('rt.rent_id', 'incomes.rent_id')->get();
     }
+    /**
+     * Get pending amount.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
+     */
+    public function getPendingAmountUsingRentId ($rent_id, $month, $year) {
+      $last_day = date('t', strtotime(date($year.'-'.$month.'-01')));
 
-   
+      if($month == date('m') && $year == date('Y')) {
+        $last_day = date('d');
+      }
+
+      $date = $year.'-'.$month.'-'.$last_day;
+
+      $first_date = $year.'-'.$month.'-01';
+
+      $next_month_date = date('Y-m-t', strtotime($date));
+
+        $query = RentIncomes::select(\DB::raw('IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) < 0, 
+                                IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > 0,
+                                  IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                                   0),
+                                tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount)
+                                as pending_amount'), 'rt1.amount as prev_amount')
+                    
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) <= '".$first_date."' group by rent_id) tbl_rt"), "rt.rent_id", "=", "rent_incomes.rent_id")
+
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rent_incomes.rent_id")
+
+                    ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 and DATE(tbl_rent_incomes.date_of_rent) >= '".$next_month_date."' group by rent_id) tbl_rt1"), "rt1.rent_id", "=", "rent_incomes.rent_id")
+
+                    ->where(array('rent_incomes.is_active' => 1))
+                    ->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
+                    ->groupBy('rt.rent_id', 'rt1.rent_id' , 'incomes.rent_id')
+                    ->where('rent_incomes.rent_id', $rent_id);
+        return $query->first();
+    }
+    
 }

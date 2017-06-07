@@ -11,8 +11,12 @@ class Users extends Model
 			[
 				"username" => 'required',
 				"email" => 'required|unique:users,email',
-				"password" => 'required',
 				'avatar' => 'image|mimes:jpeg,png,jpg,gif,svg',
+			];
+		private $password_rules = 
+			[
+				"new_password" => 'required',
+				'confirm_password' => 'required|same:new_password',
 			];
 	/**
    * Validation all necessary fields.
@@ -29,6 +33,28 @@ class Users extends Model
 			}
 	      // make a new validator object
 			$v = \Validator::make($data, $this->rules);
+		
+			$this->post = $data;
+			// check for failure
+			if ($v->fails())
+			{
+					// set errors and return false
+					$this->errors = $v;
+					return false;
+			}
+			// validation pass
+			return true;
+    }
+   /**
+   * Validation for password
+   *
+   * @param  Array  $data
+   * @return Response Bool
+  */
+	public function passwordValidate($data)
+  {
+	      // make a new validator object
+			$v = \Validator::make($data, $this->password_rules);
 		
 			$this->post = $data;
 			// check for failure
@@ -63,13 +89,17 @@ class Users extends Model
 			//print_r($data);die;
 			if($request->avatar) {
 				$imageName = 'avatar.'.$request->avatar->getClientOriginalExtension();
-        $request->avatar->move(public_path('images/'.$id), $imageName);
+				$request->avatar->move(public_path('images/'.$id), $imageName);
         $data['avatar'] = $imageName;
 			}
 			unset($data['_token'], $data['_method']);
 
 			if(isset($data['password'])) {
 				$data['password'] = bcrypt($data['password']);
+			}
+			if(isset($data['new_password'])) {
+				$data['password'] = bcrypt($data['new_password']);
+				unset($data['confirm_password'], $data['new_password']);
 			}
 			$data['id'] = $id;
 

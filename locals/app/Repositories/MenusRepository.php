@@ -73,4 +73,14 @@ class MenusRepository
                     ->orderby('menu_order', 'asc')
                     ->get();
     }
+    /**
+     * Find menu using menu link.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Menus[]
+     */
+    public function findByMenuLink($link)
+    {
+        return Menus::where(array('menu_link' => $link))
+                    ->first();
+    }
 }

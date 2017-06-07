@@ -41,6 +41,9 @@
 									<td>{{trans('message.email')}}</td>
 									<td>{{trans('message.mobile_no')}}</td>
 									<td>{{trans('message.amount')}}</td>
+									<td>{{trans('message.electricity_amount')}}</td>
+									<td>{{trans('message.total_amount')}}</td>
+									<td>{{trans('message.pending_amount')}}</td>
 									<td>{{trans('message.rent_amount_received')}}</td>
 								</tr>
 							</thead>
@@ -52,7 +55,10 @@
 										<td>{{ $value->email }}</td>
 										<td>{{ $value->mobile_no }}</td>
 										<td>{{ $value->amount }}</td>
-										<td class="text-center">{{ $value->rent_amount_received }}</td>
+										<td>{{ $value->electricity_amount }}</td>
+										<td>0</td>
+										<td>{{ $value->pending_amount }}</td>
+										<td class="text-center">{{ $value->pending_amount }}</td>
 									</tr>
 								@endforeach
 							</tbody>
@@ -86,12 +92,28 @@
 		    },
 		    {
 		    	"targets" : [4],
-		    	"data" : "rent_amount_received",
+		    	"data" : "electricity_amount"
+		    },
+		    {
+		    	"targets" : [5],
+		    	"data": "0",
 		    	render : function ( data, type, full, meta ) {
+		    		return parseInt(full.amount) + parseInt(full.electricity_amount);
+		    	}
+		    },
+		    {
+		    	"targets" : [6],
+		    	"data" : "pending_amount"
+		    },
+		    {
+		    	"targets" : [7],
+		    	"data" : "pending_amount",
+		    	render : function ( data, type, full, meta ) {
+		    		//console.log(data, full)
 		    		if(data == 0) {
-		    			return '<span class="red amount-yes">No</span>';
-		    		} else {
 		    			return '<span class="green amount-yes">Yes</span>';
+		    		} else {
+		    			return '<span class="red amount-yes">No</span>';
 		    		}
 		    	}
 		    }

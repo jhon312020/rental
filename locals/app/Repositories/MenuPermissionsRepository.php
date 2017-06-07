@@ -72,4 +72,29 @@ class MenuPermissionsRepository
         return MenuPermissions::where(array('is_active' => 1))
                     ->get();
     }
+    /**
+     * Check if the menu permission of the user role and return true.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\MenuPermissions[]
+     */
+    public function checkMenuPermissions($role_id, $route_path)
+    {
+        return MenuPermissions::select("menu_permissions.id as permission_id")
+                  ->leftjoin("menus", "menus.id", "=", "menu_permissions.menu_id")
+                  ->where(array("menu_permissions.is_active" => 1, "menu_permissions.role_id" => $role_id, "menus.menu_link" => $route_path))
+                    ->first();
+    }
+    /**
+     * Get 
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\MenuPermissions[]
+     */
+    public function getMenusByRole($role_id)
+    {
+        return MenuPermissions::select("menus.*")
+                  ->leftjoin("menus", "menus.id", "=", "menu_permissions.menu_id")
+                  ->where(array('menus.is_active' => 1, "menu_permissions.is_active" => 1, "menu_permissions.role_id" => $role_id))
+                  ->orderby('menus.menu_order', 'asc')
+                  ->get();
+    }
 }

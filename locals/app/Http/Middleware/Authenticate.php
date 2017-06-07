@@ -14,6 +14,7 @@ class Authenticate
      * @param  \Closure  $next
      * @param  string|null  $guard
      * @return mixed
+     * $2y$10$HauB9Iw9uvALGUv9OSpNYe3afi6mDh4cdgCHrtHQ1GvyNF/kfUi3y - admin123
      */
     public function handle($request, Closure $next, $guard = null)
     {

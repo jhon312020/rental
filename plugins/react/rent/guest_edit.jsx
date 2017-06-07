@@ -57,7 +57,7 @@ class Grid extends React.Component {
 
 		var checkbox = this.refs.checkbox;
 		var _this = this;
-		$(checkbox).iCheck({
+		/*$(checkbox).iCheck({
       checkboxClass: 'icheckbox_minimal-blue',
       radioClass: 'iradio_flat-green'
     }).on('ifChanged', function(event) {
@@ -65,7 +65,7 @@ class Grid extends React.Component {
     	var val = event.target.checked ? 1 : 0;
     	_this.changeCheckboxVal("is_incharge", val);
 
-    });
+    });*/
 		
 		var header = this.state.header;
 
@@ -170,24 +170,25 @@ class Grid extends React.Component {
 
   }
 
-  updateIncharge (event) {
-  	console.log(event.target.checked)
 
-  }
-
-  changeCheckboxVal (key, value) {
-
-  	console.log(key)
+  updateIncharge (trIndex, key, event) {
+  	//console.log(trIndex)
+  	//console.log(this.state.keyIndex)
+  	var element = $(event.target);
+  	var is_checked = element.is(':checked')? 1 : 0;
+  	this.props.onChangeIncharge(this.state.keyIndex, is_checked, 'is_incharge');
 
   	var rowData = this.state.trData;
+
   	var inputName = header_data[key];
+
   	var _this = this;
   	
-  	var form_data = { id : rowData.id, guest_id : rowData.guest_id, income_id : rowData.income_id, column_key : key, column_value : value };
+  	var form_data = { id : rowData.id, guest_id : rowData.guest_id, income_id : rowData.income_id, column_key : key, column_value : is_checked };
 
 		loadAndSave.save(form_data, ajax_url.rent_update).then(function ( data ) {
 
-			//console.log(index, gridData, this.state.key, event.target.value)
+			/*//console.log(index, gridData, this.state.key, event.target.value)
 			rowData.is_incharge = value;
 
 			console.log(rowData)
@@ -195,7 +196,7 @@ class Grid extends React.Component {
 			//this.setState({ grid : { index : trData } })
 			_this.setState({ trData : rowData }, () => {
 				
-			});
+			});*/
 
 			jqueryValidate.renderSuccessToast(inputName + " updated successfully!");
 
@@ -204,9 +205,8 @@ class Grid extends React.Component {
 			jqueryValidate.renderErrorToast(error.error[0]);
 
 		});
-
-
   }
+
 
 	render() {
 		
@@ -226,7 +226,7 @@ class Grid extends React.Component {
 	var top = this.state.topHeight;
 	var tr = this.state.trData;
 	var trIndex = this.state.keyIndex;
-
+	//console.log(tr.is_incharge, tr.incharge_set)
 	//console.log(tr['styles'])
 	//console.log(tr)
 	return  (
@@ -274,7 +274,6 @@ class Grid extends React.Component {
 
 				 	if(inputType[key]) {
 				 		if(inputType[key] == 'radio') {
-
 				 			headerStyle.textAlign = "center";
 
 				 			return (	
@@ -283,7 +282,7 @@ class Grid extends React.Component {
 					      	
 					         <span>
 					            <label>
-			                  <input type="checkbox" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"}   defaultChecked={ tr[key] ? true : false } onChange={this.changeCheckboxVal.bind(this, key)} />
+			                  <input type="checkbox" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} checked={ tr[key] && tr.incharge_set ? true : false } onChange={this.updateIncharge.bind(this, trIndex, key)} />
 			                </label>
 					         </span>
 					      	
@@ -542,6 +541,7 @@ class Guest extends React.Component {
 					loadAndSave.post(form_data, ajax_url.get_guest_by_id).then(function ( data ) {
 						_this.setState({ oldGuest : data.guest });
 						$('.side-nav').css('width', '300px');
+						$('.jsSideoverlay').show();
 					}).fail(function ( error ) {
 
 					})
@@ -602,6 +602,28 @@ class Guest extends React.Component {
     	//console.log(styles, value, index)
     	//console.log(this.state)
    }
+
+   onUpdateIncharge ( trIndex, val, key ) {
+		var gridData = this.state.grid;
+		//console.log('index' + trIndex)
+		$.each(gridData, function ( index, value ) {
+			//console.log(trIndex, index, gridData[index].id, key)
+			if (!val) {
+				gridData[index]['incharge_set'] = 0;
+			} else {
+				gridData[index]['incharge_set'] = 1;
+			}
+			if(gridData[index].id != trIndex) {
+				//console.log(gridData[index].id)
+				gridData[index][key] = 0;
+			} else {
+				gridData[index][key] = val;
+			}
+		});
+		//console.log(gridData)
+
+		this.setState({ grid : gridData });
+	}
 
    updateHeight (index, key, node) {
 
@@ -783,11 +805,25 @@ class Guest extends React.Component {
 
 				});
 
+			} else {
+				if(isNext) {
+					setTimeout( function () {
+						_this.isTabbed = false;
+					}, 10);
+					this.setState({ textVisible : false });
+				} else {
+					this.setState({ isShowTextArea : false, textVisible : false });
+				}
 			}
-
-			
 		} else {
-			
+			if(isNext) {
+				setTimeout( function () {
+					_this.isTabbed = false;
+				}, 10);
+				this.setState({ textVisible : false });
+			} else {
+				this.setState({ isShowTextArea : false, textVisible : false });
+			}
 			jqueryValidate.renderErrorToast(isValid.msg);
 		}
 		
@@ -873,22 +909,28 @@ class Guest extends React.Component {
 		var gridData = this.state.grid;
 
 		//console.log(gridData)
-
 		var finalGrid = 
 			gridData.filter(function(arr, index) {
 				return !arr.selected;
 			});
-
+		var ids = gridData.filter(function (arr, index) { return arr.selected }).map(function (value) { return value.id })
+		var _this = this;
 		if(gridData.length != finalGrid.length) {
+			commonFunctions.showConfirmAlert('Confirm!', 'Are you sure to delete?').then(function (data) {
+				var form_data = { ids: ids };
+				loadAndSave.save(form_data, ajax_url.remove_rents).then(function ( data ) {
+					jqueryValidate.renderSuccessToast("Rent removed successfully");
+					_this.setState({ grid : _this.state.grid.filter(function (e, i) {
+		      	return !e.selected;
+		      	})
 
-			this.setState({ grid : this.state.grid.filter(function (e, i) {
-      	return !e.selected;
-      	})
-
-    	}, () => {
-    		this.updateRowHeight();
-    	})
-    	
+		    	}, () => {
+		    		_this.updateRowHeight();
+		    	})
+				}).fail(function ( error ) {
+					jqueryValidate.renderSuccessToast("Some problem occurs");
+				})
+			})
 		}
 
 		//console.log(this.state.grid)
@@ -920,9 +962,10 @@ class Guest extends React.Component {
 
 	outerClick () {
 
-		$(document).on('click', 'body', function ( event ) {
+		$(document).on('click', '.jsSideoverlay', function () {
 			$('.side-nav').css('width', '0px');
-		})
+			$('.jsSideoverlay').hide();
+		});
 	}
 
 	showTextarea () {
@@ -1071,7 +1114,7 @@ class Guest extends React.Component {
 			                     	
 			                     	{this.state.grid.map(function(tr, index) {
 			                     		
-			                     		return <Grid onChangeParentStyle={_this.onChangeStyle.bind(_this)} trData={tr} header={header} key={tr.id} keyIndex={tr.id} onChangeParentFocus={_this.onChangeFocus.bind(_this)} />
+			                     		return <Grid onChangeParentStyle={_this.onChangeStyle.bind(_this)} trData={tr} header={header} key={tr.id} keyIndex={tr.id} onChangeParentFocus={_this.onChangeFocus.bind(_this)} onChangeIncharge={_this.onUpdateIncharge.bind(_this)}  />
 			                        })}
 
 			                     

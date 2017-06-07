@@ -1,6 +1,3 @@
-<?php
-//echo $page_name_active;die;
-?>
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
 
@@ -11,7 +8,7 @@
         @if (! Auth::guest())
         <div class="user-panel">
             <div class="pull-left image">
-                <img src="{{asset('/img/user2-160x160.jpg')}}" class="img-circle" alt="User Image" />
+                <img src="{{$default_avatar}}" class="img-circle" alt="User Image" />
             </div>
             <div class="pull-left info">
                 <p>{{ Auth::user()->name }}</p>
@@ -47,7 +44,7 @@
             @foreach($parent_menus as $menu_lists)
                 @if(!$menu_lists['is_child'])
                 <li>
-                    <a href="{{ URL::to($menu_lists['menu_link']) }}"><i class="fa fa-{{$menu_lists['menu_icon']}}"></i> <span>{{ $menu_lists['menu_name'] }}</span></a>
+                    <a data-menu-id="{{$menu_lists['id']}}" href="{{ URL::to($menu_lists['menu_link']) }}"><i class="fa fa-{{$menu_lists['menu_icon']}}"></i> <span>{{ $menu_lists['menu_name'] }}</span></a>
                 </li>
                 @else
                 <?php echo Helper::getSubmenus($menu_lists, $menus); ?>

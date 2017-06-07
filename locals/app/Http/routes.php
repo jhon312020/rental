@@ -60,6 +60,7 @@ Route::group(['prefix' => 'expenses'], function () {
 
 Route::group(['prefix' => 'users'], function () {
 	Route::match(array('GET','POST'), '/profile', 'UsersController@profile');
+	Route::match(array('GET','POST'), '/change-password', 'UsersController@changePassword');
 });
 
 Route::resource('settings', 'SettingsController');
@@ -67,6 +68,7 @@ Route::resource('settings', 'SettingsController');
 Route::group(['prefix' => 'rents'], function () {
 	Route::get('/{id}/destroy', 'RentsController@destroy');
 	Route::get('/get-rent-monthly', 'RentsController@rentMonthlyReport');
+	Route::get('/get-bill-monthly', 'RentsController@billMonthlyReport');
 	Route::get('/{room_id}/rent-edit', 'RentsController@editRentByRoomId');
 	Route::get('/list-update', 'RentsController@listUpdate');
 });
@@ -77,6 +79,10 @@ Route::group(['prefix' => 'reports'], function () {
 	Route::get('/incomes', 'ReportsController@incomeReport');
 	Route::get('/expenses', 'ReportsController@expenseReport');
 	Route::get('/electricity', 'ReportsController@electricityBillReport');
+});
+
+Route::group(['prefix' => 'message'], function () {
+	Route::match(array('GET','POST'), '/index', 'MessageController@index');
 });
 
 Route::resource('rents', 'RentsController');
@@ -113,4 +119,7 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/create-income-type', 'AjaxController@createIncomeType');
 	Route::post('/create-expense-type', 'AjaxController@createExpenseType');
 	Route::post('/create-new-income', 'AjaxController@createNewIncome');
+	Route::post('/get-last-paid-rent', 'AjaxController@getLast5PaidRental');
+	Route::post('/remove-rents', 'AjaxController@removeRents');
+	Route::get('/get-guests', 'AjaxController@getGuests');
 });

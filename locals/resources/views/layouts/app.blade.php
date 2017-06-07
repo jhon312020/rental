@@ -31,6 +31,7 @@ desired effect
 -->
 <body class="skin-blue fixed sidebar-mini">
 <div class="wrapper">
+    @include('layouts.partials.sideoverlay')
 
     @include('layouts.partials.mainheader')
 
@@ -53,6 +54,8 @@ desired effect
     @include('layouts.partials.footer')
 
 </div><!-- ./wrapper -->
+
+@yield('page-js-script')
 
 @section('scripts')
     @include('layouts.partials.scripts')

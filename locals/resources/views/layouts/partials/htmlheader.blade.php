@@ -3,7 +3,7 @@
 ?>
 <head>
     <meta charset="UTF-8">
-    <title> Rent - @yield('htmlheader_title', 'Rent') </title>
+    <title> Rent - @yield('htmlheader_title', $setting['title']) </title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <!-- Bootstrap 3.3.4 -->
@@ -79,9 +79,10 @@
     <script type="text/javascript">
       $.ajaxSetup({
         headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
         }
       });
+      var active_menu = {!! isset($active_menu) ? json_encode($active_menu) : json_encode([]) !!};
       var APP_URL = {!! json_encode(url('/')) !!}
       var ajax_url = { 
               rent_serach : "{{action('GuestsController@getGuestByKey')}}",
@@ -115,7 +116,10 @@
               get_rent_by_room_no : "{{action('AjaxController@getRentByRoomNo')}}",
               create_income_type : "{{action('AjaxController@createIncomeType')}}",
               create_expense_type : "{{ action('AjaxController@createExpenseType')}}",
-              create_new_income : "{{ action('AjaxController@createNewIncome') }}"
+              create_new_income : "{{ action('AjaxController@createNewIncome') }}",
+              get_last_transactions: "{{ action('AjaxController@getLast5PaidRental') }}",
+              remove_rents: "{{ action('AjaxController@removeRents') }}",
+              get_guests: "{{ action('AjaxController@getGuests') }}",
           };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

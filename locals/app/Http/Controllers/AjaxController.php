@@ -183,11 +183,13 @@ class AjaxController extends Controller
         $data = [ "guest_id" => $post_params['guest_id'], "id" => $post_params['id'], "rent_id" => $post_params['rent_id'] ];
         $data[$key] = $value;
 
-        $validate = [ "email", "mobile_no", "amount", "checkin_date" ];
+        $validate = [ "email", "mobile_no", "amount", "checkin_date", "electricity_amount" ];
         if(in_array($key, $validate)) {
             $valid = $this->rents->keyValidate($data, $key);
             if($valid) {
                $result = $this->rents->updateByKey($post_params);
+                $result['pending_amount'] = (int) $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year'])->pending_amount;
+                $result['result'] = $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year']);
                return response()->json($result);
             } else {
                $errors['error'] = $this->rents->errors();
@@ -196,6 +198,8 @@ class AjaxController extends Controller
             }
         } else {
             $result = $this->rents->updateByKey($post_params);
+            $result['pending_amount'] = (int) $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year'])->pending_amount;
+            $result['result'] = $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year']);
             return response()->json($result);
         }
     }
@@ -296,8 +300,11 @@ class AjaxController extends Controller
                return response()->json($errors, 400);
             }
         } else {
-            $result = $this->rents->updateByRentKey($post_params);
-            return response()->json($result);
+          if ($key == 'is_incharge') {
+            $this->rents->updateIsInchargeByRoomId($post_params);
+          }
+          $result = $this->rents->updateByRentKey($post_params);
+          return response()->json($result);
         }
         
     }
@@ -826,16 +833,69 @@ class AjaxController extends Controller
     */
     public function createNewIncome (Request $request) {
       $post_params = $request->all();
-      $post_params['date_of_income'] = date('d/m/Y');
-      
-      if ($this->incomes->validate($post_params)) {
-        $id = $this->incomes->insertOrUpdate($post_params);
-
-        return response()->json([ 'success' => true, 'msg' => 'New income created successfully!', 'id' => $id]);
-
+      $post_params['income_type'] = \Config::get('constants.RENT');
+      $month = $post_params['month'];
+      $year = $post_params['year'];
+      unset($post_params['month'], $post_params['year']);
+      if ($this->incomes->ajaxValidate($post_params)) {
+        $valid = $this->incomes->rentValidate($post_params);
+        if (!$valid['error']) {
+          $id = $this->incomes->insertOrUpdate($post_params);
+          $pending_amount = (int) $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $month, $year)->pending_amount;
+          return response()->json([ 'success' => true, 'msg' => 'New income created successfully!', 'id' => $id, 'pending_amount' => $pending_amount ]);
+        } else {
+          return response()->json(['errors' => 'Invalid', 'msg' => [$valid['msg']], 'status' => 400], 400);            
+        }
       } else {
         $errors = $this->incomes->errors();
         return response()->json(['errors' => 'Invalid', 'msg' => $errors, 'status' => 400], 400);          
       }
+    }
+    /**
+     * Get last 5 rent amount received for particular user.
+     *
+     * @param  
+     * @return Response
+    */
+    public function getLast5PaidRental (Request $request) {
+      $post_params = $request->all();    
+      $last_paid_rent = $this->income_repo->getLastPaidRentUsingRentId($post_params)->toArray();
+      return response()->json([ 'success' => true, 'last_paid_rent' => $last_paid_rent ]);
+    }
+
+    /**
+     * Remove the rents by rent ids.
+     *
+     * @param  id
+     * @return Response
+    */
+    public function removeRents (Request $request)
+    {
+
+        $post_params = $request->all();
+
+        $ids = $post_params['ids'];
+        
+        $result = $this->rents->removeRentsByIds($ids);
+
+        return response()->json([ 'success' => true, "msg" => "Rent removed successfully" ]);
+        
+    }
+    /**
+     * Get all guests.
+     *
+     * @param  NULL
+     * @return Response
+    */
+    public function getGuests (Request $request)
+    {
+
+        $post_params = $request->all();
+        //print_r($post_params);die;
+        $result = $this->guest_repo->getAllGuests($post_params);
+        $total = $this->guest_repo->getTotalGuests();
+
+        return response()->json([ "recordsTotal" => $total, "recordsFiltered" => $result['count'], "data" => $result['data'] ]);
+        
     }
 }

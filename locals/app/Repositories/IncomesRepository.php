@@ -69,10 +69,14 @@ class IncomesRepository
      */
     public function allActive()
     {
-        return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type')
-                    ->join('users', 'users.id', '=', 'incomes.user_id')
-                    ->join('income_types', 'income_types.id', '=', 'incomes.income_type')
+        return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as guest', 'rooms.room_no')
+                    ->leftjoin('users', 'users.id', '=', 'incomes.user_id')
+                    ->leftjoin('rents', 'incomes.rent_id', '=', 'rents.id')
+                    ->leftjoin('rooms', 'rents.room_id', '=', 'rooms.id')
+                    ->leftjoin('guests', 'rents.guest_id', '=', 'guests.id')
+                    ->leftjoin('income_types', 'income_types.id', '=', 'incomes.income_type')
                     ->where(array('incomes.is_active' => 1))
+                    ->where('incomes.amount', '>', 0)
                     ->get();
     }
 
@@ -100,12 +104,14 @@ class IncomesRepository
      */
     public function getIncomesReportBetweenDates ($start_date, $end_date)
     {
-        return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as rent_from')
+        return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as rent_from', 'rooms.room_no')
                     ->join('users', 'users.id', '=', 'incomes.user_id')
                     ->join('rents', 'rents.id', '=', 'incomes.rent_id')
                     ->join('guests', 'guests.id', '=', 'rents.guest_id')
+                    ->leftjoin('rooms', 'rents.room_id', '=', 'rooms.id')
                     ->join('income_types', 'income_types.id', '=', 'incomes.income_type')
                     ->where(array('incomes.is_active' => 1))
+                    ->where('amount', '>', 0)
                     ->whereRaw('DATE(tbl_incomes.date_of_income) >= ? AND DATE(tbl_incomes.date_of_income) <= ? ', [$start_date, $end_date])
                     ->get();
     }
@@ -233,6 +239,18 @@ class IncomesRepository
                     ->where([ 'is_active' => 1, 'income_type' => \DB::raw(\Config::get('constants.RENT')), 'rent_amount_received' => 0 ])
                     ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? AND YEAR(tbl_incomes.date_of_income) = ? ', [$month, $year])
                     ->first();
+    }
+
+    /**
+     * Get last 5 rent amount paid
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Incomes[]
+     */
+    public function getLastPaidRentUsingRentId ($data)
+    {
+        return Incomes::select('rent_id', 'amount', 'date_of_income')
+                    ->where([ 'is_active' => 1, 'income_type' => \DB::raw(\Config::get('constants.RENT')), 'rent_id' => $data['rent_id'] ])
+                    ->skip(0)->take(5)->get();
     }
     
 }

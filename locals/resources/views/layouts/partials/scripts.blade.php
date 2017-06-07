@@ -14,6 +14,9 @@
 <!-- Jquery Datepicker-->
 <script src="{{ asset('/js/load-save.js') }}"></script>
 
+<!-- Common functions-->
+<script src="{{ asset('/js/common-functions.js') }}"></script>
+
 <!-- Jquery validation-->
 <script src="{{ asset('/js/validation.js') }}"></script>
 

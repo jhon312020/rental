@@ -35,11 +35,11 @@ class GuestsController extends Controller
     public function index(GuestsRepository $guests)
     {
         // get all the nerds
-        $guests = $this->guest_repo->allActive();
+        //$guests = $this->guest_repo->allActive();
 
         // load the view and pass the nerds
-        return view('guests.index')
-            ->with(array('guests' => $guests));
+        return view('guests.index');
+            //->with(array('guests' => $guests));
     }
 	/**
      * Show the form for creating a new resource.

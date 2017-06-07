@@ -74,7 +74,7 @@
 
 <!-- end row -->
 <div class="row">
-  <div class="col-lg-6">
+  <div class="col-lg-12">
     <div class="card-box">
       <!-- <a href="#" class="pull-right btn btn-default btn-sm waves-effect waves-light">View All</a> -->
       <h4 class="text-dark header-title m-t-0">{{trans('message.unpaid_guests_list').' for '.date('F-Y', strtotime($date)) }}</h4>
@@ -88,6 +88,9 @@
               <td>{{trans('message.name')}}</td>
               <td>{{trans('message.mobile_no')}}</td>
               <td>{{trans('message.amount')}}</td>
+              <td>{{trans('message.electricity_amount')}}</td>
+              <td>{{trans('message.total_amount')}}</td>
+              <td>{{trans('message.pending_amount')}}</td>
             </tr>
           </thead>
           <tbody>
@@ -97,6 +100,9 @@
                 <td>{{ $value->name }}</td>
                 <td>{{ $value->mobile_no }}</td>
                 <td>{{ $value->amount }}</td>
+                <td>{{ $value->electricity_amount }}</td>
+                <td>{{ $value->amount + $value->electricity_amount }}</td>
+                <td>{{ $value->pending_amount }}</td>
               </tr>
             @endforeach
           </tbody>
@@ -105,13 +111,13 @@
     </div>
   </div>
   <!-- col -->
-  <div class="col-lg-6">
+  <!--<div class="col-lg-6">
     <div class="card-box">
-      <!-- <a href="#" class="pull-right btn btn-default btn-sm waves-effect waves-light">View All</a> -->
+      <a href="#" class="pull-right btn btn-default btn-sm waves-effect waves-light">View All</a>
       <h4 class="text-dark header-title m-t-0">{{trans('message.paid_guests_list').' for '.date('F-Y', strtotime($date)) }}</h4>
-      <!-- <p class="text-muted m-b-30 font-13">
+      <p class="text-muted m-b-30 font-13">
         Use the button classes on an element.
-      </p> -->
+      </p>
       <div class="table-responsive m-t-20">
         <table class="table table-striped table-bordered datatable">
           <thead>
@@ -134,7 +140,7 @@
         </table>
       </div>
     </div>
-  </div>
+  </div>-->
   <!-- end col -->
 </div>
 <!-- end row -->

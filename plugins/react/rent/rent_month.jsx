@@ -16,6 +16,8 @@ var objDate = new Date(dateMonth),
 
 var dateFormat = month + '-' + objDate.getFullYear();
 
+var monthYear = objDate.getMonth() + 1 + '-' + objDate.getFullYear();
+
 var rentInput = { month : objDate.getMonth() + 1, year : objDate.getFullYear() };
 
 var validateInput = { amount : "integer", mobile_no : "integer" };
@@ -28,9 +30,9 @@ var ignoreHeight = ["top_height", "max_height"];
 
 var empty_data = { room_no : "", name : "", email : "", mobile_no : "", amount : "", styles : { max_height : 35, top_height : 0 } };
 
-var header_data = { checkbox : "", room_no : "Room no", name : "Name", email : "Email", mobile_no : "Mobile no", checkin_date : "Checkin date", no_of_days_stayed : "No of days stayed", amount : "Amount" };
+var header_data = { checkbox : "", room_no : "Room no", name : "Name", email : "Email", mobile_no : "Mobile no", checkin_date : "Checkin date", no_of_days_stayed : "No of days stayed", amount : "Amount", electricity_amount : "Electricity amount", pending_amount: "Pending amount" };
 
-var editable_header = [ "room_no", "no_of_days_stayed" ];
+var editable_header = [ "room_no", "no_of_days_stayed", "pending_amount" ];
 
 const inputType = { rent_amount_received : "radio" };
 
@@ -40,6 +42,8 @@ const propTypes =
 		mobile_no : React.PropTypes.number.isRequired,
 		email : React.PropTypes.string.isRequired,
 	} ;
+
+var rent_incomes_form = {amount : '', notes : '', date_of_income : ''};
 
 var containerWidth = 0;
 
@@ -93,8 +97,6 @@ class Grid extends React.Component {
 
   }
 
-  
-  
 	componentDidMount() {
 		// Call select2 on your node
     
@@ -248,9 +250,9 @@ class Grid extends React.Component {
 
   }
 
-  getRentDetails () {
+  getRentDetails (rowIndex) {
   	var rowData = this.state.trData;
-  	this.props.showSlide(rowData);
+  	this.props.showSlide(rowData, this.state.keyIndex);
   }
 
 	render() {
@@ -336,7 +338,7 @@ class Grid extends React.Component {
 				 	} else {
 				  	return (	
 				  		<div tabIndex={tabIndex} className="react-grid-Cell" style={headerStyle} key={index} onDoubleClick={this.showInput.bind(this, 'dblclick', key, headerStyle, tabIndex + 1)} onFocus={this.updateFocusStateInput.bind(this, key, headerStyle, tabIndex + 1, trIndex, index)} ref={"reactGridCell_" + trIndex + '_' +  index} onKeyUp={this.showInput.bind(this, 'keyup', key, headerStyle, tabIndex + 1)}>
-				  			{ key == 'room_no' && <i data-toggle="tooltip" title="View rent details" data-container="body" className="fa fa-eye view-icon" onClick={this.getRentDetails.bind(this)}></i>}
+				  			{ key == 'room_no' && <i data-toggle="tooltip" title="View rent details" data-container="body" className="fa fa-eye view-icon" onClick={this.getRentDetails.bind(this, index)}></i>}
 					      <div className="react-grid-Cell__value">
 					      	
 					         <span>
@@ -361,10 +363,12 @@ class Guest extends React.Component {
 	
 	constructor(props, context) {
 		super(props, context);
-		this.state = { grid : data, containerWidth : 0, textAreaStyle : {left : '0px', top : '0px', height : 'auto', minHeight : '0px'}, isShowTextArea : false, key : null, index : null, minHeight : '0px', domNode : null, textInputValue : null, tabIndex : 0, nextId : null, dateFormat : dateFormat, rentInput : rentInput, changeIcon : true, isErrorInput : true, errorSpanStyle : {left : '0px', top : '0px', height : 'auto', position : "absolute", zIndex : 9, width : "150px", background : "red", color : "#fff" }, errorSpanText : null, isActive : "current", trash : inactiveRentData, textVisible : false, slideStyle : { height : "0px" }, popup_rent_amount:0, popup_rent_notes:'', trData:{} };
+		this.state = { grid : data, containerWidth : 0, textAreaStyle : {left : '0px', top : '0px', height : 'auto', minHeight : '0px'}, isShowTextArea : false, key : null, index : null, minHeight : '0px', domNode : null, textInputValue : null, tabIndex : 0, nextId : null, dateFormat : dateFormat, rentInput : rentInput, changeIcon : true, isErrorInput : true, errorSpanStyle : {left : '0px', top : '0px', height : 'auto', position : "absolute", zIndex : 9, width : "150px", background : "red", color : "#fff" }, errorSpanText : null, isActive : "current", trash : inactiveRentData, textVisible : false, slideStyle : { height : "0px" }, rent_incomes: $.extend(true, {}, rent_incomes_form), trData:{}, latestRent: [], incomeIndex : '' };
 
 		this.isTabbed = false;
 		this.focusElement = null;
+		this.mouse_is_inside = false;
+		this.monthYear = monthYear;
 		//console.log(this.state.grid)
 	}
 
@@ -469,12 +473,6 @@ class Guest extends React.Component {
 		//console.log(grid)
 	}
 
-	_outerClick ( event ) {
-		if($(event.target).attr('id') != 'slide-out-top' && $('#slide-out-top').has(event.target).length == 0) {
-			this.setState({ slideStyle : { height : "0%" } });
-		}
-	}
-
 	componentWillMount () {
 		
 		this.updateRowHeight();
@@ -491,7 +489,13 @@ class Guest extends React.Component {
 
 		document.addEventListener("keydown", this._handleKeyDown.bind(this));
 
-		document.body.addEventListener("click", this._outerClick.bind(this));
+		//document.body.addEventListener("click", this._outerClick.bind(this));
+		var _this = this;
+		$(document).on('click', '.jsSideoverlay', function () {
+			_this.setState({ slideStyle : { height : '0%' } });
+			$(this).hide();
+		});
+
 
 	}
 
@@ -554,6 +558,22 @@ class Guest extends React.Component {
 		containerWidth += 19;
 
 		const _this = this;
+		const rentDatePicker = this.refs.rental_date;
+		$(rentDatePicker).datepicker({
+			autoclose : true,
+			format: "dd/mm/yyyy",
+			viewMode: "montKonths",
+			endDate : new Date()
+		}).on('show', function ( ev ) {
+
+		}).on('hide', function ( ev ) {
+
+		}).on('changeDate', function ( ev ) {
+			var rent_incomes = _this.state.rent_incomes;
+			rent_incomes['date_of_income'] = ev.target.value;
+			_this.setState({ rent_incomes : rent_incomes });
+		});
+
 		const datePicker = this.refs.datepicker;
 		$(datePicker).datepicker({
 			autoclose : true,
@@ -575,6 +595,7 @@ class Guest extends React.Component {
 	    	const str = month + '-' + ev.date.getFullYear();
 	    	
 	    	var rentInput = { month : parseInt(ev.date.getMonth() + 1), year : ev.date.getFullYear() };
+	    	_this.monthYear = rentInput.month + '-' + rentInput.year;
 
 	    	const old_month = _this.state.dateFormat;
 
@@ -620,7 +641,12 @@ class Guest extends React.Component {
 		this.setState({ containerWidth : containerWidth });
 
 		this.updateRowHeight();
-		//https://github.com/kriasoft/react-starter-kit/issues/909
+		$('#slide-out-top').hover(function(){ 
+      _this.mouse_is_inside = true; 
+      console.log('hover')
+    }, function(){ 
+      _this.mouse_is_inside = false;
+    });
 	}
 
 	showDatepicker () {
@@ -816,13 +842,14 @@ class Guest extends React.Component {
 			//console.log(index)
 			var _this = this;
 			if(val != columnValue) {
-
-				var form_data = { id : rowData.id, guest_id : rowData.guest_id, column_key : key, column_value : val, rent_id : rowData.rent_id };
+				var monthYear = this.monthYear.split('-');
+				var form_data = { id : rowData.id, guest_id : rowData.guest_id, column_key : key, column_value : val, rent_id : rowData.rent_id, month : monthYear[0], year : monthYear[1] };
 
 				loadAndSave.save(form_data, ajax_url.update_rent_income).then(function ( data ) {
 
 					//console.log(index, gridData, this.state.key, event.target.value)
 					gridData[index][key] = val;
+					gridData[index]['pending_amount'] = data.pending_amount;
 
 					console.log(gridData)
 					//console.log(gridData)
@@ -852,11 +879,25 @@ class Guest extends React.Component {
 
 				});
 
+			} else {
+				if(isNext) {
+					setTimeout( function () {
+						_this.isTabbed = false;
+					}, 10);
+					this.setState({ textVisible : false });
+				} else {
+					this.setState({ isShowTextArea : false, textVisible : false });
+				}
 			}
-
-			//console.log(isNext)
 		} else {
-
+			if(isNext) {
+				setTimeout( function () {
+					_this.isTabbed = false;
+				}, 10);
+				this.setState({ textVisible : false });
+			} else {
+				this.setState({ isShowTextArea : false, textVisible : false });
+			}
 			jqueryValidate.renderErrorToast(msg);
 		}
 		
@@ -1062,50 +1103,63 @@ class Guest extends React.Component {
 		}
 	}
 
-	onShowSlide (rowData) {
+	onShowSlide (rowData, rowIndex) {
+		
+		var form_data = { rent_id :  rowData.rent_id};
+		var _this = this;
 
-		this.setState({ slideStyle : { height : "100%" } });
-		this.setState({ trData : rowData });
-		
-		/*var form_data = { rent_id :  rowData.rent_id};
-		
+		var keyIndex = 0;
+
+		this.state.grid.map(function(obj, i){
+		    if (obj.id == rowIndex) keyIndex = i;    
+		});
+
 		loadAndSave.post(form_data, ajax_url.get_last_transactions).then(function ( data ) {
-
-			this.setState({ slideStyle : { height : "100%" } });
+			_this.setState({ slideStyle : { height : "100%" }, trData : rowData, latestRent : data.last_paid_rent, incomeIndex : keyIndex  });
+			$('.jsSideoverlay').show();
 
 		}).fail(function ( error ) {
 
-		})*/
+		})
 		
 	}
 
-	onChangeRentForm(event) {
-		switch(event.target.name){
-			case 'popup_rent_amount':
-				this.setState({popup_rent_amount: event.target.value});
-				break;
-			case 'popup_rent_notes':
-				this.setState({popup_rent_notes: event.target.value});
-				break;
-		}
+	onChangeRentForm (event) {
+		var rent_incomes = this.state.rent_incomes;
+		rent_incomes[event.target.name] = event.target.value;
+		this.setState({ rent_incomes : rent_incomes });
 	}
 
-	updateRent(){
+	updateRent () {
+		var index = this.state.incomeIndex;
+		var gridData = this.state.grid;
+		console.log(index, gridData)
+
 		var rowData = this.state.trData;
-		if (this.state.popup_rent_amount == '') {
+		var rent_incomes = this.state.rent_incomes;
+		if (!rent_incomes.amount.trim().length) {
 			jqueryValidate.renderErrorToast('Kindly fill the amount field');
 			return true;
 		}
-  		var form_data = { user_id : rowData.guest_id, rent_id : rowData.rent_id, amount: this.state.popup_rent_amount, notes: this.state.popup_rent_notes, income_type:2  };
-		loadAndSave.save(form_data, ajax_url.create_new_income).then(function ( data ) {
-
-			$('#popup_rent_amount,#popup_rent_notes').val('');
-			jqueryValidate.renderSuccessToast("Updated successfully!");
+		if (!rent_incomes.date_of_income.trim().length) {
+			jqueryValidate.renderErrorToast('Kindly fill the date field');
+			return true;
+		}
+		var _this = this;
+		rent_incomes['user_id'] = rowData.guest_id;
+		rent_incomes['rent_id'] = rowData.rent_id;
+		var monthYear = this.monthYear.split('-');
+		rent_incomes['month'] = monthYear[0];
+		rent_incomes['year'] = monthYear[1];
+		//console.log(rent_incomes)
+		loadAndSave.save(rent_incomes, ajax_url.create_new_income).then(function ( data ) {
+			//$('#popup_rent_amount,#popup_rent_notes').val('');
+			gridData[index]['pending_amount'] = data.pending_amount;
+			_this.setState({ rent_incomes : {amount : '', notes : '', date_of_income : ''}, slideStyle : { height : "0%" } });
+			jqueryValidate.renderSuccessToast("Income added successfully!");
 
 		}).fail(function ( error ) {
-
-			jqueryValidate.renderErrorToast(error.error[0]);
-
+			jqueryValidate.renderErrorToast(error.msg[0]);
 		});
 	}
 
@@ -1119,16 +1173,22 @@ class Guest extends React.Component {
 		var _this = this;
 		
 		var rentForm = (<form>
-							<div className="form-group">
-								<label >Enter amount:</label>
-								<input type="text" className="form-control" onChange={this.onChangeRentForm.bind(this)} name="popup_rent_amount" id="popup_rent_amount"/>
-							</div>
-							<div className="form-group">
-								<label >Enter notes:</label>
-								<textarea className="form-control" name="popup_rent_notes" id="popup_rent_notes" onChange={this.onChangeRentForm.bind(this)}></textarea>
-							</div>
-							<button type="button" className="btn btn-primary"  style={{ background : "#337ab7", color : "white" }} onClick={this.updateRent.bind(this)} >Submit</button>
-						</form>);
+							
+									<div className="form-group">
+										<label >Enter amount:</label>
+										<input type="text" className="form-control" onChange={this.onChangeRentForm.bind(this)} name="amount" id="amount" value={this.state.rent_incomes.amount} />
+									</div>
+									<div className="form-group">
+										<label >Enter date:</label>
+										<input type="text" className="form-control" ref="rental_date" name="date_of_income" id="date_of_income" onChange={this.onChangeRentForm.bind(this)} value={this.state.rent_incomes.date_of_income} />
+									</div>
+									<div className="form-group">
+										<label >Enter notes:</label>
+										<textarea className="form-control" name="notes" id="notes" onChange={this.onChangeRentForm.bind(this)} value={this.state.rent_incomes.notes}></textarea>
+									</div>
+									<button type="button" className="btn btn-primary"  style={{ background : "#337ab7", color : "white", width: "100%" }} onClick={this.updateRent.bind(this)} >Submit</button>
+						</form>
+						);
 		
 		return (
 		<div>
@@ -1163,11 +1223,37 @@ class Guest extends React.Component {
 				      		<div className="background">
 					        <img src={ ASSETS_PATH + '/office.jpg' } />
 					      </div>
-					      <a href="javascript:;"><img className="circle" src={ ASSETS_PATH + '/yuna.jpg' } /></a>
+					      <a href="javascript:;"><img className="circle" src={ ASSETS_PATH + '/rupee.png' } /></a>
 				    	</div>
 				    </li>
+				    <li className="add-rent-label" style={{ marginTop: "-8px" }}><span>Add rental amount</span></li>
 				    <li style={{ width : "90%" }} >
 				    	{rentForm}
+				    </li>
+				    <li className="add-rent-label label-li"><span>Last 5 rent amount recieved</span></li>
+				    <li className="" style={{ width: "100%" }}>
+				    	<div className="">
+								<div className="col-sm-12">
+									<table className="table table-bordered table-hover lastest-rent-table">
+										<thead>
+											<tr>
+												<th>Date</th>
+												<th>Amount</th>
+											</tr>
+										</thead>
+										<tbody>
+											{this.state.latestRent.map(function(rent_amount, index) {
+					           			return (
+					           				<tr key={index}>
+					           					<td>{rent_amount.date_of_income}</td>
+					           					<td>{rent_amount.amount}</td>
+					           				</tr>
+					           			)
+					           	})}
+										</tbody>
+									</table>
+								</div>
+							</div>
 				    </li>
 				  </ul>
 				</div>

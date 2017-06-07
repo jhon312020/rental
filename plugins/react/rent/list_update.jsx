@@ -877,11 +877,25 @@ class Guest extends React.Component {
 
 				});
 
+			} else {
+				if(isNext) {
+					setTimeout( function () {
+						_this.isTabbed = false;
+					}, 10);
+					this.setState({ textVisible : false });
+				} else {
+					this.setState({ isShowTextArea : false, textVisible : false });
+				}
 			}
-
-			
 		} else {
-			
+			if(isNext) {
+				setTimeout( function () {
+					_this.isTabbed = false;
+				}, 10);
+				this.setState({ textVisible : false });
+			} else {
+				this.setState({ isShowTextArea : false, textVisible : false });
+			}
 			jqueryValidate.renderErrorToast(isValid.msg);
 		}
 		

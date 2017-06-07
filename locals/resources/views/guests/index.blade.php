@@ -24,7 +24,7 @@
 						<div class="row">
 							<div class="col-sm-12">
 								<div class="table-responsive">
-									<table class="table table-striped table-bordered datatable">
+									<table class="table table-striped table-bordered" id="guestTable">
 										<thead>
 											<tr>
 												<td>{{trans('message.name')}}</td>
@@ -36,7 +36,7 @@
 											</tr>
 										</thead>
 										<tbody>
-											@foreach($guests as $key => $value)
+											<?php /*@foreach($guests as $key => $value)
 												<tr>
 													<td>{{ $value->name }}</td>
 													<td>{{ $value->city }}</td>
@@ -44,24 +44,17 @@
 													<td>{{ $value->email }}</td>
 													<td>{{ $value->mobile_no }}</td>
 
-													<!-- we will also add show, edit, and delete buttons -->
 													<td>
 
-													<!-- delete the nerd (uses the destroy method DESTROY /nerds/{id} -->
-													<!-- we will add this later since its a little more complicated than the other two buttons -->
-
-													<!-- show the nerd (uses the show method found at GET /nerds/{id} -->
-													<!--<a class="btn btn-small btn-success" href="{{ URL::to('guests/' . $value->id) }}">Show this Nerd</a>-->
 													<a href="{{ URL::to('guests/' . $value->id . '/edit') }}" class="btn btn-info btn-sm">
 														<span class="glyphicon glyphicon-edit"></span>
 													</a>
 													<a href="javascript:;" data-href="{{ URL::to('guests/' . $value->id . '/destroy') }}" class="btn btn-danger btn-sm jsDelete">
 														<span class="glyphicon glyphicon-trash"></span>
 													</a>
-													<!-- edit this nerd (uses the edit method found at GET /nerds/{id}/edit -->
 													</td>
 												</tr>
-											@endforeach
+											@endforeach */ ?>
 										</tbody>
 									</table>
 								</div>
@@ -71,4 +64,52 @@
 				</div>
 			</div>
 		</div>
+@endsection
+
+@section('page-js-script')
+<script type="text/javascript">
+$(document).ready(function() {
+	var columns_defs = 
+		[
+	    {
+	    	"targets" : [0],
+	    	"data" : "name",
+	    },
+	    {
+	    	"targets" : [1],
+	    	"data" : "city"
+	    },
+	    {
+	    	"targets" : [2],
+	    	"data" : "state"
+	    },
+	    {
+	    	"targets" : [3],
+	    	"data" : "email"
+	    },
+	    {
+	    	"targets" : [4],
+	    	"data" : "mobile_no"
+	    },
+	    {
+	    	"targets" : [5],
+	    	"orderable" : false,
+	    	render : function ( data, type, full, meta ) {
+	    		//console.log(data, full)
+	    		var $income_url = "{{ URL::to('guests/') }}";
+	    		var $edit_url = $income_url + '/' + full.id + '/edit';
+	    		var $delete_url = $income_url + '/' + full.id + '/destroy';
+	   			return '<a href="' + $edit_url + '" class="btn btn-info btn-sm">'+
+									'<span class="glyphicon glyphicon-edit"></span>'+
+								'</a>'+
+								'<a href="javascript:;" data-href="' + $delete_url + '" class="btn btn-danger btn-sm jsDelete" style="margin-left:5px;">'+
+									'<span class="glyphicon glyphicon-trash"></span>'+
+								'</a>';
+	    	}
+	    }
+		];
+	var url = ajax_url.get_guests;
+	commonFunctions.ajaxDataTable(columns_defs, url, 'guestTable');
+});
+</script>
 @endsection

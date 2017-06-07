@@ -217,6 +217,7 @@ return [
 			'Form' => Collective\Html\FormFacade::class,
             'HTML' => Collective\Html\HtmlFacade::class,
             'Helper' => App\Helpers\Helper::class,
+            'TextLocalHelper' => App\Helpers\TextLocalHelper::class,
 
     ],
 

@@ -52,23 +52,29 @@ $(document).ready(function() {
 		    		end_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-' + ev.date.getDate();
 		    		start_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-01';
 		    		$('#monthText').text(str);
+		    		//console.log(str)
 
 		    		old_month = str;
+		    		if (typeof month_report_ajax_url != 'undefined') {
+			    		var form_data = { start_date : start_date };
+			    			//console.log(form_data)
+			    		loadAndSave.post(form_data, month_report_ajax_url).then(function ( data ) {
+			    			//console.log($.parseJSON(data.y_axis))
 
-		    		var form_data = { start_date : start_date };
-		    			//console.log(form_data)
-		    		loadAndSave.post(form_data, month_report_ajax_url).then(function ( data ) {
-		    			//console.log($.parseJSON(data.y_axis))
+			    			monthChart.setTitle({text : "Income report for the month of " + str });
+			    			monthChart.xAxis[0].setCategories(data.x_axis);
+			    			monthChart.series[0].update({ data : $.parseJSON(data.y_axis) });
 
-		    			monthChart.setTitle({text : "Income report for the month of " + str });
-		    			monthChart.xAxis[0].setCategories(data.x_axis);
-		    			monthChart.series[0].update({ data : $.parseJSON(data.y_axis) });
+			    			$('#month_total').text(data.total_amount);
 
-		    			$('#month_total').text(data.total_amount);
+					    }).fail(function ( error ) {
 
-				    }).fail(function ( error ) {
-
-				    })
+					    })
+				  	}
+				  	if ($('.jsDateForm').length) {
+				  		$('#start_date').val(start_date);
+				  		$('.jsDateForm').submit();
+				  	}
 		    	}
 	    	}
 		});
@@ -250,9 +256,11 @@ $(document).ready(function() {
 	}
 
 	previewConfig().then(function(data) {
+
 		if(data) {
 			caption = [{caption: avatar, size: data, url: file_path}];
 		}
+		console.log(caption)
 		
 		var btnCust = '';
 		$("#avatar").fileinput({
@@ -293,21 +301,9 @@ $(document).ready(function() {
 	
 	$(document).on('click', 'a.jsDelete', function(e) {
 		var $href = $(this).data('href');
-		$.confirm({
-			title: 'Confirm!',
-			content: 'Are you sure to delete?',
-			buttons: {
-				cancel: function(){
-					
-				},
-				confirm: {
-					text: "Yes I'am", // Some Non-Alphanumeric characters
-					action: function(){
-						location.replace($href);
-					}
-				}
-			}
-		});
+		commonFunctions.showConfirmAlert('Confirm!', 'Are you sure to delete?').then(function (data) {
+			location.replace($href);	
+		})
 	});
 
 	$(document).on('click', '.jsModal', function(e) {
@@ -349,7 +345,7 @@ $(document).ready(function() {
 			
 			var html = 
 				'<tr class="duplicateRow" style="display:none;background:' + bgColor + '">'+
-					'<td colspan=5>'+
+					'<td colspan=6>'+
 						'<div class="col-sm-12 duplicateDiv" style="display:none;">'+
 							'<table class="table table-striped table-bordered">'+
 								'<thead>'+
@@ -375,7 +371,7 @@ $(document).ready(function() {
 											'<a href="' + APP_URL + '/rents/' + value.id + '/edit" class="btn btn-info btn-sm" style="margin-right:3px;">'+
 												'<span class="glyphicon glyphicon-edit"></span>'+
 											'</a>'+
-											'<a href="javascript::" data-href="' + APP_URL + '/rents/' + value.id + '/destroy" class="btn btn-danger btn-sm jsDelete">'+
+											'<a href="javascript:;" data-href="' + APP_URL + '/rents/' + value.id + '/destroy" class="btn btn-danger btn-sm jsDelete">'+
 												'<span class="glyphicon glyphicon-trash"></span>'+
 											'</a>'+
 										'</tr>';
@@ -394,26 +390,13 @@ $(document).ready(function() {
 		})
 	})
 
-	var $href = window.location.href;
-	var $activeElement = $('.sidebar-menu a[href="' + $href +  '"]');
-	var $createHref = $href.replace('/create', '');
-	var $editHref = $href.replace(/\/\d\/edit/, '');
-	//console.log($editHref, $href)
-
-	if($activeElement.length) {
+	//Active menu link.
+	var $activeElement = $('.sidebar-menu a[data-menu-id="' + active_menu.active_menu_id +  '"]');
+	console.log(active_menu.active_menu_id)
+	if ($activeElement.length) {
 		$activeElement.closest('li').addClass('active');
 		$activeElement.closest('ul.treeview-menu').addClass('menu-open');
 		$activeElement.closest('li.treeview').addClass('active');
-	} else if($('.sidebar-menu a[href="' + $createHref +  '"]').length) {
-			var $activeElement = $('.sidebar-menu a[href="' + $createHref +  '"]');
-			$activeElement.closest('li').addClass('active');
-			$activeElement.closest('ul.treeview-menu').addClass('menu-open');
-			$activeElement.closest('li.treeview').addClass('active');
-	} else if($('.sidebar-menu a[href="' + $editHref +  '"]').length) {
-			var $activeElement = $('.sidebar-menu a[href="' + $editHref +  '"]');
-			$activeElement.closest('li').addClass('active');
-			$activeElement.closest('ul.treeview-menu').addClass('menu-open');
-			$activeElement.closest('li.treeview').addClass('active');
 	}
 
 	$(document).on('click', '.jaAddTypes', function () {
@@ -459,5 +442,10 @@ $(document).ready(function() {
 			}
 		})
 	})
-
+	
+	$(document).on('click', "#jsSendMessage", function () {
+		$('[name="send_message"]').val(1);
+		$('.jsDateForm').submit();
+	})
+	
 })

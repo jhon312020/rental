@@ -32,7 +32,7 @@ if($.type(formData) == 'object') {
 
 var ignoreHeight = ["top_height", "max_height"];
 
-var empty_data = {name : "", email : "", address : "", mobile_no : "", advance : "", rent_amount : "", is_incharge : 0, styles : { max_height : 35, top_height : 0 } };
+var empty_data = {name : "", email : "", address : "", mobile_no : "", advance : "", rent_amount : "", is_incharge : 0, incharge_set : 0, styles : { max_height : 35, top_height : 0 } };
 
 var header_data = {checkbox : "", name : "Name", email : "Email", address : "Address", mobile_no : "Mobile no", advance : "Advance", rent_amount : "Rent amount", is_incharge : "Is incharge" };
 
@@ -310,7 +310,7 @@ class Grid extends React.Component {
 							<div className="react-grid-Cell__value">
 								<span>
 									<div className="react-grid-checkbox-container">
-										<input className="react-grid-checkbox" defaultChecked={tr['selected_' + trIndex]} onChange={this.selectRow.bind(this)} type="checkbox" name={"checkbox" + trIndex + key} />
+										{ tr['rent_id'] || tr['guest_id'] ? "" : <input className="react-grid-checkbox" defaultChecked={tr['selected_' + trIndex]} onChange={this.selectRow.bind(this)} type="checkbox" name={"checkbox" + trIndex + key} /> }
 										<label htmlFor={"checkbox" + trIndex + key} className="react-grid-checkbox-label"></label>
 
 										{tr['rent_id'] && <input type="hidden" name={"guest[" + trIndex + "][rent_id]"} value={tr['rent_id']} /> }
@@ -341,7 +341,8 @@ class Grid extends React.Component {
 					      	
 					         <span>
 					            <label>
-			                  <input type="checkbox" className="inchargeCheck" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} onChange={this.updateIncharge.bind(this, trIndex)} checked={ tr[key] == 1 ? true : false } value="1" />
+					            	<input type="hidden" name={"guest[" + trIndex + "][incharge_set]"} value={tr.incharge_set} />
+			                  <input type="checkbox" className="inchargeCheck" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} onChange={this.updateIncharge.bind(this, trIndex)} checked={ tr[key] == 1 && tr.incharge_set == 1 ? true : false } value="1" />
 			                </label>
 					         </span>
 					      	
@@ -643,6 +644,7 @@ class Guest extends React.Component {
 					loadAndSave.post(form_data, ajax_url.get_guest_by_id).then(function ( data ) {
 						_this.setState({ oldGuest : data.guest });
 						$('.side-nav').css('width', '300px');
+						$('.jsSideoverlay').show();
 					}).fail(function ( error ) {
 
 					})
@@ -663,9 +665,11 @@ class Guest extends React.Component {
 
 	outerClick () {
 
-		$(document).on('click', 'body', function ( event ) {
+		$(document).on('click', '.jsSideoverlay', function () {
 			$('.side-nav').css('width', '0px');
-		})
+			$('.jsSideoverlay').hide();
+		});
+
 	}
 
 	onChangeFocus (node) {
@@ -985,6 +989,11 @@ class Guest extends React.Component {
 		//console.log('index' + trIndex)
 		$.each(gridData, function ( index, value ) {
 			//console.log(gridData.id, trIndex, index, gridData[index][key])
+			if (!val) {
+				gridData[index]['incharge_set'] = 0;
+			} else {
+				gridData[index]['incharge_set'] = 1;
+			}
 			if(gridData[index].id != trIndex) {
 				//console.log(gridData[index].id)
 				gridData[index][key] = 0;

@@ -165,4 +165,37 @@ class UsersController extends Controller
                 ->with(['user' => $user]);    
         }
     }
+    /**
+     * Change password
+     *
+     * @param  NULL
+     * @return Response
+     */
+    public function changePassword(Request $request)
+    {
+        $id = Auth::User()->id;
+        //echo $id;die;
+        if ($request->isMethod('post')) {
+            $data = $request->all();
+            $data['id'] = $id;
+            $valid = $this->users->passwordValidate($data);
+            //print_r($_FILES);die;
+            if($valid) {
+                $this->users->insertOrUpdate($request);
+                \Session::flash('message', trans('message.user_update_password_success'));
+                // redirect
+                return \Redirect::to('users/profile');
+            } else {
+                $errors = $this->users->errors();
+                return redirect()->back()->withErrors($errors)->withInput();
+            }
+        } else {
+            // get the nerd
+            $user = $this->users->find($id);
+            //print_r($user);die;
+            // show the edit form and pass the nerd
+            return view('users.change_password')
+                ->with(['user' => $user]);    
+        }
+    }
 }

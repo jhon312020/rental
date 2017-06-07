@@ -107,7 +107,7 @@ class ReportsController extends Controller
 
         $rent_monthly = $this->rent_repo->activeRentsIncome($month, $year);
 
-        //print_r($rent_monthly);die;
+      //print_r($rent_monthly);die;
        return view('reports.guests_rent')
             ->with([ 'rent_monthly' => $rent_monthly, 'start_date' => $start_date, 'end_date' => $end_date, ]);
     }

@@ -8,9 +8,13 @@ use App\Repositories\SettingsRepository;
 
 use App\Repositories\MenusRepository;
 
+use App\Repositories\MenuPermissionsRepository;
+
 use App\Settings;
 
 use App\Menus;
+
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,23 +23,32 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(Request $request)
     {
-        \View::composer('*', function($view) {
+        \View::composer('*', function($view) use ($request) {
             
-            //print_r('bright');die;
+            $route_path = $request->route()->getPath();
             if(\Auth::User()) {
+                $user = \Auth::User();
                 $setting_repo = new SettingsRepository();
                 $menu_repo = new MenusRepository();
+                $menu_permission_repo = new MenuPermissionsRepository();
                 $setting = $setting_repo->all()->lists('setting_value', 'setting_key')->toArray();
                 $roles = \Auth::User()->roles;
                 if($roles->role_name == 'admin') {
                     $menus = $menu_repo->allActive()->toArray();
                 } else {
-
+                  $menus = $menu_permission_repo->getMenusByRole(\Auth::User()->role_id)->toArray();
+                  //print_r($menus);die;
                 }
+                $default_avatar = asset('/img/default_avatar_male.jpg');
+                if ($user->avatar) {
+                  $default_avatar = asset('locals/public/images/'.$user->id.'/'.$user->avatar);
+                }
+                $active_menu = $menu_repo->findByMenuLink($route_path);
+                //print_r($active_menu);die;
                 //print_r($setting);die;
-                $view->with(['setting' => $setting, 'menus' => $menus]);
+                $view->with([ 'setting' => $setting, 'menus' => $menus, 'default_avatar' => $default_avatar, 'active_menu' => $active_menu ]);
             }
             
             

@@ -42,11 +42,17 @@ class ExpensesController extends Controller
     public function index()
     {
         // get all the nerds
-        $expenses = $this->expense_repo->allActive();
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+
+        //Create the current month electric bills details.
+        $expenses = $this->expense_repo->getExpensesReportBetweenDates($start_date, $end_date);
+
+        $total_expenses = $this->expense_repo->getTotalExpensesByDates($start_date, $end_date);
 
         // load the view and pass the nerds
         return view('expenses.index')
-            ->with(array('expenses' => $expenses));
+            ->with(array('expenses' => $expenses, 'total_expenses' => $total_expenses->amount, 'start_date' => $start_date, 'end_date' => $end_date ));
     }
 	/**
      * Show the form for creating a new resource.
