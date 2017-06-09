@@ -70,8 +70,8 @@ class ExpensesRepository
     public function allActive()
     {
         return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type')
-                    ->join('users', 'users.id', '=', 'expenses.user_id')
-                    ->join('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
+                    ->leftjoin('users', 'users.id', '=', 'expenses.user_id')
+                    ->leftjoin('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
                     ->where(array('expenses.is_active' => 1))
                     ->get();
     }
@@ -84,8 +84,8 @@ class ExpensesRepository
     public function getMonthlyExpensesReport ($month, $year)
     {
         return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_income', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_income as expense_type')
-                    ->join('users', 'users.id', '=', 'expenses.user_id')
-                    ->join('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
+                    ->leftjoin('users', 'users.id', '=', 'expenses.user_id')
+                    ->leftjoin('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
                     ->where(array('expenses.is_active' => 1))
                     ->whereRaw('MONTH(tbl_expenses.date_of_income) = ? AND YEAR(tbl_expenses.date_of_income) = ? ', [$month, $year])
                     ->get();
@@ -99,8 +99,8 @@ class ExpensesRepository
     public function getExpensesReportBetweenDates ($start_date, $end_date)
     {
         return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type')
-                    ->join('users', 'users.id', '=', 'expenses.user_id')
-                    ->join('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
+                    ->leftjoin('users', 'users.id', '=', 'expenses.user_id')
+                    ->leftjoin('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
                     ->where(array('expenses.is_active' => 1))
                     ->whereRaw('DATE(tbl_expenses.date_of_expense) >= ? AND DATE(tbl_expenses.date_of_expense) <= ? ', [$start_date, $end_date])
                     ->get();

@@ -115,10 +115,28 @@ class RentIncomesRepository
      */
     public function getMobileNos($rent_incomes_ids)
     {
-        $query = RentIncomes::select('guests.mobile_no as number', \DB::raw("'Your payment amount is 2000. Please paid quickly.' as text"))
+        $query = RentIncomes::select('guests.mobile_no as number',
+            \DB::raw('CONCAT(CONCAT(CONCAT(CONCAT("Your rent amount is ", 
+                  IF((
+                    IF(tbl_rt.amount is not null, tbl_rt.amount, 0) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) < 0, 
+                        IF((IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > 0,
+                          IF(tbl_rt.amount is not null, tbl_rt.amount, 0) + tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0),
+                           0),
+                        tbl_rent_incomes.amount + tbl_rent_incomes.electricity_amount)), ". Total pending amount is "), 
+                          IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) > tbl_rent_incomes.amount, 
+                        tbl_rent_incomes.amount, 
+                      IF((SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)) <= 0,
+                        0, (SUM(tbl_rt.amount) - IF(tbl_incomes.amount is not null, SUM(tbl_incomes.amount), 0)))), ". Please paid as quickly.")
+                          )
+                        as text')
+         //\DB::raw("'Your payment amount is 2000. Please paid quickly.' as text")
+         )
                   ->leftjoin('rents', 'rents.id', '=', 'rent_incomes.rent_id')
+                  ->leftjoin(\DB::raw("(SELECT SUM(amount + electricity_amount) as amount, rent_id from tbl_rent_incomes where is_active = 1 group by rent_id) tbl_rt"), "rt.rent_id", "=", "rents.id")
+                  ->leftjoin(\DB::raw("(SELECT SUM(amount) as amount, rent_id from tbl_incomes where income_type = '".\Config::get('constants.RENT')."' AND is_active = 1 group by rent_id) tbl_incomes"), "incomes.rent_id", "=", "rents.id")
                   ->leftjoin('guests', 'guests.id', '=', 'rents.guest_id')
-                  ->whereIn('rent_incomes.id', $rent_incomes_ids);
+                  ->whereIn('rent_incomes.id', $rent_incomes_ids)
+                  ->groupBy('rt.rent_id', 'incomes.rent_id');
         
         return [  "messages" => $query->get()->toArray() ];
     }

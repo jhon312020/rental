@@ -257,6 +257,9 @@ $(document).ready(function() {
 
 	previewConfig().then(function(data) {
 
+		if(typeof file_path == 'undefined') {
+			return false;
+		}
 		if(data) {
 			caption = [{caption: avatar, size: data, url: file_path}];
 		}
@@ -392,7 +395,6 @@ $(document).ready(function() {
 
 	//Active menu link.
 	var $activeElement = $('.sidebar-menu a[data-menu-id="' + active_menu.active_menu_id +  '"]');
-	console.log(active_menu.active_menu_id)
 	if ($activeElement.length) {
 		$activeElement.closest('li').addClass('active');
 		$activeElement.closest('ul.treeview-menu').addClass('menu-open');

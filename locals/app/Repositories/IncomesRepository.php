@@ -88,10 +88,10 @@ class IncomesRepository
     public function getMonthlyIncomesReport ($month, $year)
     {
         return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as rent_from')
-                    ->join('users', 'users.id', '=', 'incomes.user_id')
-                    ->join('rents', 'rents.id', '=', 'incomes.rent_id')
-                    ->join('guests', 'guests.id', '=', 'rents.guest_id')
-                    ->join('income_types', 'income_types.id', '=', 'incomes.income_type')
+                    ->leftjoin('users', 'users.id', '=', 'incomes.user_id')
+                    ->leftjoin('rents', 'rents.id', '=', 'incomes.rent_id')
+                    ->leftjoin('guests', 'guests.id', '=', 'rents.guest_id')
+                    ->leftjoin('income_types', 'income_types.id', '=', 'incomes.income_type')
                     ->where(array('incomes.is_active' => 1))
                     ->whereRaw('MONTH(tbl_incomes.date_of_income) = ? AND YEAR(tbl_incomes.date_of_income) = ? ', [$month, $year])
                     ->get();
@@ -104,10 +104,11 @@ class IncomesRepository
      */
     public function getIncomesReportBetweenDates ($start_date, $end_date)
     {
+        //echo $start_date;die;
         return Incomes::select('incomes.id', 'incomes.amount', 'incomes.income_type as income_type_id', 'incomes.user_id', 'incomes.date_of_income', 'incomes.notes', 'users.name as entry_by', 'income_types.type_of_income as income_type', 'guests.name as rent_from', 'rooms.room_no')
-                    ->join('users', 'users.id', '=', 'incomes.user_id')
-                    ->join('rents', 'rents.id', '=', 'incomes.rent_id')
-                    ->join('guests', 'guests.id', '=', 'rents.guest_id')
+                    ->leftjoin('users', 'users.id', '=', 'incomes.user_id')
+                    ->leftjoin('rents', 'rents.id', '=', 'incomes.rent_id')
+                    ->leftjoin('guests', 'guests.id', '=', 'rents.guest_id')
                     ->leftjoin('rooms', 'rents.room_id', '=', 'rooms.id')
                     ->join('income_types', 'income_types.id', '=', 'incomes.income_type')
                     ->where(array('incomes.is_active' => 1))
