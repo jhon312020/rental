@@ -25,7 +25,7 @@ var ignoreHeight = ["top_height", "max_height"];
 
 var empty_data = {name : "", city : "", state : "", country : "", zip : "", email : "", address : "", mobile_no : "", advance : "", is_incharge : true, styles : { max_height : 35, top_height : 0 } };
 
-var header_data = {checkbox : "", name : "Name", city : "City", state : "State", country : "Country", zip : "Zip", email : "Email", address : "Address", mobile_no : "Mobile no", checkin_date : "Checkin date", checkout_date : "Checkout date", advance : "Advance", is_incharge : "Is incharge" };
+var header_data = {checkbox : "", name : "Name", city : "City", state : "State", country : "Country", zip : "Zip", email : "Email", address : "Address", mobile_no : "Mobile no", checkin_date : "Checkin date", /*checkout_date : "Checkout date",*/ advance : "Advance", is_incharge : "Is incharge" };
 
 const inputType = { is_incharge : "radio" };
 

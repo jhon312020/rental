@@ -52,13 +52,13 @@
 								                  <small class="help-block">{{ $errors->first('rent.checkin_date') }}</small>
 								                  @endif
 								               </div>
-								               <div class="col-sm-6 {{ $errors->has('rent.checkout_date')? 'has-error': '' }}">
+								              <!-- <div class="col-sm-6 {{ $errors->has('rent.checkout_date')? 'has-error': '' }}">
 								                  {{ Form::label('rent[checkout_date]', trans('message.checkout_date')) }}
 								                  {{ Form::text('rent[checkout_date]', old('checkout_date') ? old('checkout_date') : $rent->checkout_date, array('class' => 'form-control datepicker')) }}
 								                  @if ($errors->has('rent.checkout_date'))
 								                  <small class="help-block">{{ $errors->first('rent.checkout_date') }}</small>
 								                  @endif
-								               </div>
+								               </div>-->
 								            </div>
 								         </div>
 								      </div>

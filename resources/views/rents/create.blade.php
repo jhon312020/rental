@@ -88,7 +88,7 @@
 								                  @endif
 								               </div>
 								            </div>
-								            <div class="row form-top">
+								            <!--<div class="row form-top">
 								               
 								               <div class="col-sm-6 {{ $errors->has('rent.checkout_date')? 'has-error': '' }}">
 								                  {{ Form::label('rent[checkout_date]', trans('message.checkout_date')) }}
@@ -97,7 +97,7 @@
 								                  <small class="help-block">{{ $errors->first('rent.checkout_date') }}</small>
 								                  @endif
 								               </div>
-								            </div>
+								            </div>-->
 								         </div>
 								      </div>
 								   </div>

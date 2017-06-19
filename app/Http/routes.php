@@ -12,7 +12,12 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+	if (isset(\Auth::User()->id)) {
+		return \Redirect::to('home');
+	} else {
+		return \Redirect::to('login');
+	}
+	//return view('welcome');
 });
 
 Route::auth();
@@ -70,6 +75,7 @@ Route::group(['prefix' => 'rents'], function () {
 	Route::get('/get-rent-monthly', 'RentsController@rentMonthlyReport');
 	Route::get('/get-bill-monthly', 'RentsController@billMonthlyReport');
 	Route::get('/{room_id}/rent-edit', 'RentsController@editRentByRoomId');
+	Route::get('/{room_id}/room-destroy', 'RentsController@destroyByRoom');
 	Route::get('/list-update', 'RentsController@listUpdate');
 	Route::get('/settlement', 'RentsController@settlement');
 });

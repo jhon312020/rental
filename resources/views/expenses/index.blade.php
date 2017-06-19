@@ -41,7 +41,7 @@
 			             </div>
 		                <!-- /.input group -->
 		               <div class="row text-center">
-								    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="total_amount_date">{{ $total_expenses }}</span></span></p>
+								    <p class="total-p"><span class="total-span">Total expense: &#8377;&nbsp;<span id="total_amount_date">{{ number_format($total_expenses, 0) }}</span></span></p>
 									</div>
 	              </div>
 	              
