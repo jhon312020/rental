@@ -13,7 +13,7 @@
 			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{trans('message.rent_lists')}}</div>
-					<div class="panel-body">
+					<div class="panel-body" id="jsSettlmentPanel">
 						<!-- will be used to show any messages -->
 						@include('layouts.common.messages')
 						<div class="row min-height">
