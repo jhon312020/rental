@@ -22,7 +22,8 @@ class GuestsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-		$this->guests = new Guests();
+        $this->middleware('permission');
+				$this->guests = new Guests();
         $this->guest_repo = new GuestsRepository();
 
         //\View::share('page_name_active', trans('message.guests'));

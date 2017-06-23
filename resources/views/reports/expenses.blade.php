@@ -10,12 +10,12 @@
 
 @section('main-content')
 	
-
+		@if ($roles->role_name == 'admin')
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.monthly_expense_report')}}</div>
-					<div class="panel-body">
+					<div class="panel-heading">{{trans('message.monthly_expense_report')}} for the month of <span id="jsMonthReportSpan"><?php echo date('F-Y'); ?></div>
+					<div class="panel-body" id="jsReportChartMonthPanel">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 							
@@ -41,8 +41,8 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.yearly_expense_report')}}</div>
-					<div class="panel-body">
+					<div class="panel-heading">{{trans('message.yearly_expense_report')}} for the year of <span id="jsYearReportSpan"><?php echo date('Y'); ?></div>
+					<div class="panel-body" id="jsReportChartYearPanel">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 							
@@ -64,12 +64,13 @@
 				</div>
 			</div>
 		</div>
+		@endif
 
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.expense_report_between_date')}}</div>
-					<div class="panel-body">
+					<div class="panel-heading">{{trans('message.expense_report_between_date')}} from <span id="jsReportDateSpan"><?php echo date('d/m/Y', strtotime($start_date)).' to '.date('d/m/Y', strtotime($end_date)); ?></div>
+					<div class="panel-body" id="jsReportPanel">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 					    <div class="col-sm-12">
@@ -82,7 +83,7 @@
 		                    <i class="fa fa-calendar"></i>
 		                  </div>
 
-		                  <input type="text" class="form-control pull-right dateRange" id="reservation" value="<?php echo date('01/m/Y').' - '.date('d/m/Y'); ?>">
+		                  <input type="text" class="form-control pull-right dateRange" id="reservation" value="<?php echo date('d/m/Y', strtotime($start_date)).' - '.date('d/m/Y', strtotime($end_date)); ?>">
 		                  <span class="input-group-btn">
 								        <button class="btn btn-secondary searchReport" type="button"><i class="fa fa-search"></i> Search</button>
 								      </span>
@@ -170,5 +171,7 @@
 	  	]
 		};
 	</script>
-	{{ HTML::script('public/plugins/highchart/js/expense.js') }}
+	@if ($roles->role_name == 'admin')
+		{{ HTML::script('public/plugins/highchart/js/expense.js') }}
+	@endif
 @endsection

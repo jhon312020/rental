@@ -622,7 +622,7 @@ class Guest extends React.Component {
         var selected_element = $(e.currentTarget);
     		var select_val = selected_element.val();
         var form_data = { room_id : select_val, month : _this.state.rentInput.month, year : _this.state.rentInput.year };
-        loadAndSave.post(form_data, ajax_url.get_rent_by_room_no).then(function ( data ) {
+        loadAndSave.post(form_data, ajax_url.get_rent_by_room_no, 'jsRentPanel').then(function ( data ) {
 
         	_this.setState({ grid : [], trash : [] }, () => {
 
@@ -925,7 +925,7 @@ class Guest extends React.Component {
 		if(income_ids.length) {
 			var form_data = { ids : income_ids, month : this.state.rentInput.month, year : this.state.rentInput.year };
 
-			loadAndSave.deleteRecord(form_data, ajax_url.remove_rent_income).then(function ( data ) {
+			loadAndSave.deleteRecord(form_data, ajax_url.remove_rent_income, 'jsRentPanel').then(function ( data ) {
 
 				_this.setState({ grid : [], trash : [] }, () => {
 
@@ -1022,7 +1022,7 @@ class Guest extends React.Component {
 
 	createRentMonth () {
 		var _this = this;
-		loadAndSave.save(this.state.rentInput, ajax_url.rent_create).then(function ( data ) {
+		loadAndSave.save(this.state.rentInput, ajax_url.rent_create, 'jsRentPanel').then(function ( data ) {
 			//console.log(data)
 
 			_this.setState({ grid : [], trash : [] }, () => {
@@ -1061,7 +1061,7 @@ class Guest extends React.Component {
 		if(incoms_ids.length) {
 			var form_data = { ids : incoms_ids, month : this.state.rentInput.month, year : this.state.rentInput.year };
 
-			loadAndSave.post(form_data, ajax_url.move_to_active_rent).then(function ( data ) {
+			loadAndSave.post(form_data, ajax_url.move_to_active_rent, 'jsRentPanel').then(function ( data ) {
 
 				_this.setState({ grid : [], trash : [] }, () => {
 
@@ -1136,7 +1136,6 @@ class Guest extends React.Component {
 	updateRent () {
 		var index = this.state.incomeIndex;
 		var gridData = this.state.grid;
-		console.log(index, gridData)
 
 		var rowData = this.state.trData;
 		var rent_incomes = this.state.rent_incomes;
@@ -1155,7 +1154,7 @@ class Guest extends React.Component {
 		rent_incomes['month'] = monthYear[0];
 		rent_incomes['year'] = monthYear[1];
 		//console.log(rent_incomes)
-		loadAndSave.save(rent_incomes, ajax_url.create_new_income).then(function ( data ) {
+		loadAndSave.save(rent_incomes, ajax_url.create_new_income, 'jsSlideRight').then(function ( data ) {
 			//$('#popup_rent_amount,#popup_rent_notes').val('');
 			var pending = data.pending;
 			gridData[index]['pending_amount'] = pending.pending_amount;
@@ -1222,7 +1221,7 @@ class Guest extends React.Component {
            	})}
 					</select>
 
-					<ul id="slide-out-top" className="side-nav-top" style={this.state.slideStyle}>
+					<ul id="slide-out-top" className="side-nav-top" style={this.state.slideStyle} id="jsSlideRight">
 				    <li>
 				    	<div className="userView">
 				      		<div className="background">

@@ -71,7 +71,7 @@ class ElectricityBillRepository
     public function activeRoomsElectricityBill ($month, $year, $room_id = 0)
     {
 
-        $query = ElectricityBill::select('electricity_bills.id', 'electricity_bills.room_id', 'rooms.room_no', 'electricity_bills.units_used', 'electricity_bills.amount')
+        $query = ElectricityBill::select('electricity_bills.id', 'electricity_bills.room_id', 'rooms.room_no', 'electricity_bills.units_used', 'electricity_bills.amount', 'electricity_bills.is_updated')
                     ->join('rooms', 'rooms.id', '=', 'electricity_bills.room_id', 'left')
                     ->where(array('electricity_bills.is_active' => 1))
                     ->whereRaw('MONTH(tbl_electricity_bills.billing_month_year) = ? and YEAR(tbl_electricity_bills.billing_month_year) = ?', [$month, $year]);
@@ -90,7 +90,7 @@ class ElectricityBillRepository
     public function inActiveRoomsElectricityBill ($month, $year, $room_id = 0)
     {
 
-        $query = ElectricityBill::select('electricity_bills.id', 'electricity_bills.room_id', 'rooms.room_no', 'electricity_bills.units_used', 'electricity_bills.amount')
+        $query = ElectricityBill::select('electricity_bills.id', 'electricity_bills.room_id', 'rooms.room_no', 'electricity_bills.units_used', 'electricity_bills.amount', 'electricity_bills.is_updated')
                     ->join('rooms', 'rooms.id', '=', 'electricity_bills.room_id', 'left')
                     ->where(array('electricity_bills.is_active' => 0))
                     ->whereRaw('MONTH(tbl_electricity_bills.billing_month_year) = ? and YEAR(tbl_electricity_bills.billing_month_year) = ?', [$month, $year]);

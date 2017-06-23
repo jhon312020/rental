@@ -10,7 +10,13 @@ use App\Incomes;
 
 use App\RentIncomes;
 
+use App\ElectricityBill;
+
 use App\Repositories\IncomesRepository;
+
+use App\Repositories\RentsRepository;
+
+use TextLocalHelper;
 
 class Rents extends Model
 {
@@ -45,7 +51,7 @@ class Rents extends Model
 				"rent.checkout_date" => "date_format:d/m/Y",
 				"guest.name" => 'required',
 				"rent.advance" => "required|numeric",
-				"guest.email" => 'required|email|unique:guests,email',
+				"guest.email" => 'email|unique:guests,email',
 				"guest.mobile_no" => 'required|digits:10|unique:guests,mobile_no',
 			];
 
@@ -70,8 +76,12 @@ class Rents extends Model
 
 			private $settle_rules = 
 				[
-					"advance" => "required|numeric",
 					"amount" => "numeric",
+					"electricity_amount" => "numeric",
+					"checkout_date" => "required|date_format:d/m/Y",
+				];
+			private $checkout_rules = 
+				[
 					"checkout_date" => "required|date_format:d/m/Y",
 				];
 	/**
@@ -87,7 +97,7 @@ class Rents extends Model
 			$unique_value = array('email', 'mobile_no');
 			$guest_rules = array(
 					"name" => 'required',
-					"email" => 'required|email|unique:guests,email',
+					"email" => 'email|unique:guests,email',
 					"mobile_no" => 'required|digits:10|unique:guests,mobile_no',
 					"advance" => 'required|numeric',
 					"rent_amount" => 'required|numeric',
@@ -296,17 +306,17 @@ class Rents extends Model
 				$rent_date = $rent_data->date_of_rent;
 				$rent_date = date('Y-m-d', strtotime(str_replace("/", "-", $rent_date)));
 
-				if(date('Y', strtotime($checkout_date)) == date('Y', strtotime($rent_date)) && (date('m', strtotime($checkout_date)) == date('m', strtotime($rent_date)) || date('m', strtotime($checkout_date)) == date('m', strtotime($rent_date)) + 1) && strtotime($checkout_date) > strtotime($checkin_date)) {
+				if(date('Y', strtotime($checkout_date)) == date('Y', strtotime($rent_date)) && (date('m', strtotime($checkout_date)) == date('m', strtotime($rent_date)) || date('m', strtotime($checkout_date)) == date('m', strtotime($rent_date)) + 1) && strtotime($checkout_date) > strtotime($checkin_date) && $checkout_date <= date('Y-m-d')) {
 
 					return [ "valid" => true ];
 
 				} else if(strtotime($checkout_date) < strtotime($checkin_date)) {
 
-					return [ "valid" => false, "msg" => "Checkout date should be greater than ".date('d/m/Y', strtotime($checkin_date)) ];
+					return [ "valid" => false, "msg" => "Checkout date should between ".date('01/m/Y', strtotime($rent_date)).' and '.date('d/m/Y') ];
 
 				} else {
 
-					return [ "valid" => false, "msg" => "Checkout date should be in the month of ".date('m', strtotime($rent_date)).' '.date('Y', strtotime($rent_date)) ];
+					return [ "valid" => false, "msg" => "Checkout date should between ".date('01/m/Y', strtotime($rent_date)).' and '.date('d/m/Y') ];
 
 				}
 				
@@ -358,7 +368,28 @@ class Rents extends Model
 			// validation pass
 			return true;
 		}
+		public function checkoutDateValidate ($data) {
+			// make a new validator object
+			$v = \Validator::make($data, $this->checkout_rules);
+			$v->after(function($v) use($data) {
 
+				$rental_data = $this->find($data['rent_id']);
+				$checkout_validate = $this->checkoutValidate($data['checkout_date'], $data['rent_id'], $rental_data->checkin_date);
+				if(!$checkout_validate['valid']) {
+					$v->errors()->add('checkout_date', $checkout_validate['msg']);
+				}
+
+			});
+			// check for failure
+			if ($v->fails())
+			{
+					// set errors and return false
+					$this->errors = $v->errors()->all();
+					return false;
+			}
+			// validation pass
+			return true;
+		}
 		public function settleValidate ($data) {
 
 			// make a new validator object
@@ -370,12 +401,6 @@ class Rents extends Model
 
 				if(!$checkout_validate['valid']) {
 					$v->errors()->add('checkout_date', $checkout_validate['msg']);
-				}
-				$income_repo = new IncomesRepository();
-				$amountValidate = $income_repo->getBalanceAmount($data['id']);
-
-				if($amountValidate['balance'] > 0 && $amountValidate['balance'] != $data['amount']) {
-					$v->errors()->add('amount', 'The amount shoule be '.$amountValidate['balance']);
 				}
 			});
 
@@ -678,8 +703,11 @@ class Rents extends Model
 
 		//echo $date;die;
 		$rents_query = $this
-										->select('rents.id as rent_id', \DB::raw("'$date' as date_of_rent"), 
-											\DB::raw("
+										->select('rents.id as rent_id'
+											, \DB::raw("'$date' as date_of_rent") 
+											/*,'rooms.room_no'
+											,'rooms.id as room_id'*/
+											/*\DB::raw("
 												trim(
 													IF(tbl_rts.total_amount is not null and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_rts.total_amount, 
 														
@@ -697,14 +725,35 @@ class Rents extends Model
 														)
 											as rent_amount"),
 											\DB::raw("(IF(tbl_rts.total_count > 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_eb.eb_amount, tbl_eb.single_eb_amount)) as electricity_amount"), 
-											\DB::raw("IF(tbl_rts.total_count is not null and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_rts.total_count, 1) as no_of_person"),
+											\DB::raw("IF(tbl_rts.total_count is not null and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_rts.total_count, 1) as no_of_person"),*/
+											,\DB::raw("
+												trim(
+													IF(tbl_rents.incharge_set = 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_rooms.total_rent_amount, 
+														
+															IF( IF(tbl_rents.checkout_date is null, 
+															IF(MONTH(tbl_rents.checkin_date) = '".$month."' AND YEAR(tbl_rents.checkin_date) = '".$year."', 
+																	DATEDIFF(DATE('".$last_date."'), tbl_rents.checkin_date), DATEDIFF(DATE('".$last_date."'), DATE('".$first_date."'))),
+															IF(MONTH(tbl_rents.checkout_date) = '".$month."' AND YEAR(tbl_rents.checkout_date) = '".$year."', 
+																IF(MONTH(tbl_rents.checkin_date) = '".$month."' AND YEAR(tbl_rents.checkin_date) = '".$year."', 
+																		DATEDIFF(tbl_rents.checkout_date, tbl_rents.checkin_date), DATEDIFF(tbl_rents.checkout_date, DATE('".$first_date."'))),
+
+																IF(MONTH(tbl_rents.checkin_date) = '".$month."' AND YEAR(tbl_rents.checkin_date) = '".$year."', 
+																	DATEDIFF(DATE('".$last_date."'), tbl_rents.checkin_date),
+																	DATEDIFF(DATE('".$last_date."'), DATE('".$first_date."'))))) + 1 > 15, tbl_rents.rent_amount, tbl_rents.rent_amount / 2) 
+																)
+														)
+											as rent_amount")
+											,\DB::raw("(IF(tbl_rents.incharge_set = 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_eb.eb_amount, tbl_eb.single_eb_amount)) as electricity_amount")
+
+											//,\DB::raw("IF(tbl_rents.incharge_set = 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), tbl_rts.total_count, 1) as no_of_person")
+
 											//,'ris.type_rent',
 											//'rent_incomes.id',
-											\DB::raw("IF(tbl_rents.incharge_set = 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), 'group', 'individual') as type_of_rent")
+											,\DB::raw("IF(tbl_rents.incharge_set = 1 and IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 0, 1), 'group', 'individual') as type_of_rent")
 											//\DB::raw('CASE WHEN tbl_rents.incharge_set = "1" THEN "group" ELSE "individual" END as type_of_rent')
 											)
 
-										->leftjoin(\DB::raw("(SELECT 
+										/*->leftjoin(\DB::raw("(SELECT 
 											sum(
 												IF( IF(checkout_date is null, 
 												IF(MONTH(checkin_date) = '".$month."' AND YEAR(checkin_date) = '".$year."', 
@@ -719,7 +768,7 @@ class Rents extends Model
 
 												) as total_amount,
 
-											 count(id) as total_count, room_id from tbl_rents where (is_active = 1 and incharge_set=1) and ((checkout_date is null and $month >= MONTH(checkin_date) and $year >= YEAR(checkin_date)) or (checkout_date is not null and $month <= MONTH(checkout_date) and $year <= YEAR(checkout_date)) and $month >= MONTH(checkin_date) and $year >= YEAR(checkin_date)) group by room_id) tbl_rts"), "rts.room_id", "=", "rents.room_id")
+											 count(id) as total_count, room_id from tbl_rents where (is_active = 1 and incharge_set=1) and ((checkout_date is null and $month >= MONTH(checkin_date) and $year >= YEAR(checkin_date)) or (checkout_date is not null and $month <= MONTH(checkout_date) and $year <= YEAR(checkout_date)) and $month >= MONTH(checkin_date) and $year >= YEAR(checkin_date)) group by room_id) tbl_rts"), "rts.room_id", "=", "rents.room_id")*/
 
 										->leftjoin('rent_incomes', function($join) use($month, $year) {
 											$join->on(\DB::raw('MONTH(tbl_rent_incomes.date_of_rent)'), '=', \DB::raw($month))
@@ -727,6 +776,8 @@ class Rents extends Model
 													//->on(\DB::raw('tbl_rent_incomes.type_of_rent'), '=', \DB::raw("'individual'"))
 													->on('rent_incomes.rent_id', '=', 'rents.id');
 										})
+
+										->leftjoin('rooms', 'rooms.id', '=', 'rents.room_id')
 
 										->leftjoin(\DB::raw("(SELECT tbl_rent_incomes.type_of_rent as type_of_room_rent, tbl_rents.room_id from tbl_rent_incomes left join tbl_rents on tbl_rents.id = tbl_rent_incomes.rent_id where MONTH(tbl_rent_incomes.date_of_rent) = $month and YEAR(tbl_rent_incomes.date_of_rent) = $year group by tbl_rents.room_id) tbl_ris"), 'ris.room_id', '=', 'rents.room_id')
 
@@ -742,13 +793,15 @@ class Rents extends Model
 										->whereRaw("(IF(tbl_ris.type_of_room_rent is not null and tbl_ris.type_of_room_rent = 'individual', 1, tbl_rents.is_incharge = 1))")
 
 										//->whereNotNull('rents.id')
-										->whereRaw('((tbl_rents.checkout_date is null and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date)) or (tbl_rents.checkout_date is not null and ? <= MONTH(tbl_rents.checkout_date) and ? <= YEAR(tbl_rents.checkout_date)) and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date))', [ $month, $year, $month, $year, $month, $year ]);
+										->whereRaw('((tbl_rents.checkout_date is null and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date)) or (tbl_rents.checkout_date is not null and ? <= MONTH(tbl_rents.checkout_date) and ? <= YEAR(tbl_rents.checkout_date)) and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date))', [ $month, $year, $month, $year, $month, $year ])
+										->groupBy('rent_incomes.rent_id', 'rents.id');
 
 								//echo $rents_query->get();die;
 		/*echo "<pre>";
 		print_r($rents_query->get()->toArray());die;*/
+		//print_r($rents_query->get()->toArray());die;
 		$bindings = $rents_query->getBindings();
-		$insertQuery = 'INSERT into tbl_rent_incomes (rent_id, date_of_rent, amount, electricity_amount, no_of_person, type_of_rent) '
+		$insertQuery = 'INSERT into tbl_rent_incomes (rent_id, date_of_rent, amount, electricity_amount, type_of_rent) '
 								. $rents_query->toSql();
 		\DB::insert($insertQuery, $bindings);
 
@@ -1040,38 +1093,80 @@ class Rents extends Model
 		public function updateSettle ($data)
 		{
 			$rent_id = $data['id'];
-			$checkout_date = date('Y-m-d', strtotime(str_replace('/', '-', $data['checkout_date'])));
-			$this->where('id', $rent_id)->update([ 'checkout_date' => $checkout_date ]);
+			$data['rent_id'] = $rent_id;
+			$rent_repo = new RentsRepository();
 			$income_model = new Incomes();
-			$rent = $this->find($rent_id);
-			$incharge_query = $this
-												->where([ 'room_id' => $rent->room_id, 'checkout_date' => null, 'is_incharge' => 0 ])
-												->where('id', '<>', $rent_id);
+			$guest_info = $rent_repo->getGuetDetailsUsingRent($rent_id);
+			$result = $rent_repo->getSettlementAmount($data);
+			$last_rent = $result['last_month_rent_details'];
+			$current_month_rent = $data['amount'] + $data['electricity_amount'];
+			$advance_details = $income_model->where([ "is_active" => 1, "income_type" => \Config::get('constants.ADVANCE'), 'rent_id' => $rent_id ])->first();
+			$total_balance = $result['pending_amount'] - $last_rent['rent_amount'] - $last_rent['electricity_amount'] + $current_month_rent - $advance_details->amount;
 
-			if ($incharge_query->count()) {
-				if ($rent->is_incharge == 1) {
-					$list_incharge_ids = $incharge_query->pluck('id');
-					$this->whereIn('id', $list_incharge_ids)->update([ "is_incharge" => 1, "incharge_set" => 0 ]);
-				}
+			$checkout_date = date('Y-m-d', strtotime(str_replace('/', '-', $data['checkout_date'])));
+			$date_of_rent = date('Y-m-26', strtotime($checkout_date));
+			$month = date('m', strtotime($checkout_date));
+			$year = date('Y', strtotime($checkout_date));
+			$this->where('id', $rent_id)->update([ 'checkout_date' => $checkout_date ]);
+			$type_of_rent = "individual";
+			$rent_details = $this->where('id', $rent_id)->first();
+			if ($rent_details->incharge_set == 1) {
+				$type_of_rent = "group";
+				$this
+						->where([ "is_active" => 1, "checkout_date" => null, "room_id" => $rent_details->room_id ])
+						->update([ 'checkout_date' => $checkout_date ]);
 			}
-
-			if(isset($data['incharge_list'])) {
-				$this->whereIn('id', $data['incharge_list'])->update([ 'checkout_date' => $checkout_date ]);
-			}
-
-			//Update the advacne amount.
-			$income_model->where([ 'rent_id' => $rent_id, 'income_type' => \DB::raw(\Config::get('constants.RENT')) ])->update([ "amount" => $data['advance'] ]);
 			$user_id = \Auth::User()->id;
-			$incomes_data = 
-					array(
-							"rent_id" => $rent_id,
-							"amount" => $data['amount'],
-							"income_type" => \Config::get('constants.RENT'),
-							"user_id" => $user_id,
-							"date_of_income" => date('Y-m-d')
-						);
 
-			$income_model->insert($incomes_data);
+			$rent_income_model = new RentIncomes();
+			$rent_income_result = 
+				$rent_income_model
+					->where([ "rent_id" => $rent_id, "is_active" => 1 ])
+					->whereRaw("MONTH(date_of_rent) = ? AND YEAR(date_of_rent) = ?", [ $month, $year ])
+					->first();
+			if ($rent_income_result) {
+				$rent_income_model->where('id', $rent_income_result->id)->update([ "amount" => $data['amount'], "electricity_amount" => $data['electricity_amount'] ]);
+			} else {
+				$rent_income_model->insert([ "amount" => $data['amount'], "electricity_amount" => $data['electricity_amount'], "date_of_rent" => $date_of_rent, "type_of_rent" => $type_of_rent, "rent_id" => $rent_id ]);
+			}
+
+			$today = date('d/m/Y');
+			if ($total_balance > 0) {
+				$msg = "Your total settlement amount of $total_balance is received on $today. Have a nice day";
+				$incomes_data = 
+						array(
+								"rent_id" => $rent_id,
+								"amount" => $total_balance,
+								"income_type" => \Config::get('constants.RENT'),
+								"user_id" => $user_id,
+								"date_of_income" => date('Y-m-d')
+							);
+				
+				$income_model->insert($incomes_data);
+			} else {
+				$msg = "Your total settlement amount of $total_balance is returned on $today. Have a nice day";
+				$expense_data = 
+						array(
+								"rent_id" => $rent_id,
+								"amount" => $total_balance * -1,
+								"expense_type" => \Config::get('constants.SETTLEMENT'),
+								"user_id" => $user_id,
+								"date_of_expense" => date('Y-m-d')
+							);
+				$expense_model = new Expenses();
+				$expense_model->insert($expense_data);
+			}
+
+			$textlocal = new TextLocalHelper(env('TEXT_LOCAL_USERNAME'), '', env('TEXT_LOCAL_KEY'));
+	    $messages = 
+	      ["messages" => 
+	        [ 
+	          [ "text" => $msg, 'number' => $guest_info->mobile_no ]
+	        ]
+	      ];
+	    $messages['test'] = true;
+	    $response = json_decode(json_encode($textlocal->bulkJSONApi($messages)), true);
+
 			return true;
 		}
 
@@ -1086,5 +1181,60 @@ class Rents extends Model
 			$this->where('room_id', $room_id)->update([ "is_active" => 0 ]);
 			return true;
 		}
+
+		public function updateElectricityBillToRent ($data) {
+			$income_model = new RentIncomes();
+			
+			$month = $data['month'];
+			$year = $data['year'];
+
+			$this->createRentsDetailsForRooms($month, $year);
+
+			$rents = $this
+										->select('rents.id as rent_id'
+											
+											,\DB::raw("(IF(tbl_rents.incharge_set = 1, tbl_eb.eb_amount, tbl_eb.single_eb_amount)) as electricity_amount")
+											)
+
+										->leftjoin('electricity_bills', function ($join) use ($data) {
+											$month = $data['month'];
+											$year = $data['year'];
+											$join->on('electricity_bills.room_id', '=', 'rents.room_id')
+													->on(\DB::raw("MONTH(tbl_electricity_bills.billing_month_year)"), '=', \DB::raw("'$month'"))
+														->on(\DB::raw("YEAR(tbl_electricity_bills.billing_month_year)"), '=', \DB::raw("'$year'"));
+										})
+
+										->leftJoin(\DB::raw("(select eb.room_id, count(rents.id) as total_person, eb.amount as eb_amount, ROUND(eb.amount / IF(count(rents.id) > 0, count(rents.id), 1)) as single_eb_amount  from tbl_electricity_bills eb left join tbl_rents rents on rents.room_id = eb.room_id and (rents.is_active = 1) and (rents.checkout_date is null and $month >= MONTH(rents.checkin_date) and $year >= YEAR(rents.checkin_date)) or (rents.checkout_date is not null and $month <= MONTH(rents.checkout_date) and $year <= YEAR(rents.checkout_date) and $month >= MONTH(rents.checkin_date) and $year >= YEAR(rents.checkin_date)) where MONTH(eb.billing_month_year) = $month AND YEAR(eb.billing_month_year) = $year group by rents.room_id) tbl_eb"), "eb.room_id", "=", "rents.room_id")
+
+										->where([ 'rents.is_active' => 1, 'electricity_bills.is_updated' => 1 ])
+
+										//->whereNotNull('rents.id')
+										->whereRaw('((tbl_rents.checkout_date is null and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date)) or (tbl_rents.checkout_date is not null and ? <= MONTH(tbl_rents.checkout_date) and ? <= YEAR(tbl_rents.checkout_date)) and ? >= MONTH(tbl_rents.checkin_date) and ? >= YEAR(tbl_rents.checkin_date))', [ $month, $year, $month, $year, $month, $year ])
+										->groupBy('rents.id')
+										->lists('electricity_amount', 'rent_id');
+
+		$rent_incomes = 
+			RentIncomes::select('rent_incomes.id', 'rents.id as rent_id')
+				->join('rents', 'rents.id', '=', 'rent_incomes.rent_id', 'left')
+				->where(array('rent_incomes.is_active' => 1 ))
+				->whereRaw('MONTH(tbl_rent_incomes.date_of_rent) = ? and YEAR(tbl_rent_incomes.date_of_rent) = ?', [$month, $year])
+				->get()->toArray();
+
+		/*print_r($rent_incomes);
+		print_r($rents);die;*/
+		foreach ($rent_incomes as $result) {
+			$rent_income_id = $result['id'];
+			$rent_id = $result['rent_id'];
+			if (isset($rents[$rent_id])) {
+				$updated_data = [ "electricity_amount" => $rents[$rent_id] ];
+				$income_model->where('id', $rent_income_id)->update($updated_data);
+			}
+		}
+
+		ElectricityBill::whereraw("MONTH(tbl_electricity_bills.billing_month_year) = ? AND YEAR(tbl_electricity_bills.billing_month_year) = ?", [ $month, $year ])
+			->update([ "is_updated" => 0 ]);
+
+		return true;
+	}
 		
 }

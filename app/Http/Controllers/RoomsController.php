@@ -22,6 +22,7 @@ class RoomsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('permission');
 		$this->rooms = new Rooms();
         $this->room_repo = new RoomsRepository();
 

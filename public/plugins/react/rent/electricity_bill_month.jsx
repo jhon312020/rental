@@ -232,6 +232,9 @@ class Grid extends React.Component {
 
 	//console.log(tr['styles'])
 	//console.log(tr)
+	if (tr.is_updated && !$('#jsBillUpdateDiv').is(':visible')) {
+		$('#jsBillUpdateDiv').show();
+	}
 	return  (
 		<div className={"react-grid-Row react-grid-Row--even " + (tr['selected'] ? 'row-selected' : '') } style={{ "overflow" : "hidden" , "contain" : "layout"}}>
 		{Object.keys(header).map(function(key, index) {
@@ -529,7 +532,7 @@ class Guest extends React.Component {
         var selected_element = $(e.currentTarget);
     		var select_val = selected_element.val();
         var form_data = { room_id : select_val, month : _this.state.billInput.month, year : _this.state.billInput.year };
-        loadAndSave.post(form_data, ajax_url.get_bill_by_room_no).then(function ( data ) {
+        loadAndSave.post(form_data, ajax_url.get_bill_by_room_no, 'jsRentPanel').then(function ( data ) {
 
         	_this.setState({ grid : [], trash : [] }, () => {
 
@@ -545,6 +548,19 @@ class Guest extends React.Component {
         })
         
       });
+
+    $(document).on('confirmed.bs.confirmation', '[data-toggle=confirmation]', function (event) {
+	  	var form_data = { month : _this.state.billInput.month, year : _this.state.billInput.year };
+	  	loadAndSave.post(form_data, ajax_url.update_electricity_rent, 'jsRentPanel').then(function ( data ) {
+	  		if (data.success) {
+	  			jqueryValidate.renderSuccessToast(data.msg);
+	  			_this.createBillingMonth();
+	  			$('#jsBillUpdateDiv').hide();
+	  		}
+		  }).fail(function ( error ) {
+		  	jqueryValidate.renderSuccessToast("Internal server error");
+		  })	
+	  });
 
 		//https://github.com/kriasoft/react-starter-kit/issues/909
 	}
@@ -769,7 +785,7 @@ class Guest extends React.Component {
 						} else {
 							_this.setState({ isShowTextArea : false, textVisible : false });
 						}
-
+						$('#jsBillUpdateDiv').show();
 
 						jqueryValidate.renderSuccessToast(header_data[key] + " updated successfully!");
 					}).fail(function ( error ) {
@@ -882,7 +898,7 @@ class Guest extends React.Component {
 
 	createBillingMonth () {
 		var _this = this;
-		loadAndSave.save(this.state.billInput, ajax_url.bill_create).then(function ( data ) {
+		loadAndSave.save(this.state.billInput, ajax_url.bill_create, 'jsRentPanel').then(function ( data ) {
 			//console.log(data)
 
 			_this.setState({ grid : [], trash : [] }, () => {
@@ -918,7 +934,7 @@ class Guest extends React.Component {
 		if(bill_ids.length) {
 			var form_data = { ids : bill_ids, month : this.state.billInput.month, year : this.state.billInput.year };
 
-			loadAndSave.deleteRecord(form_data, ajax_url.remove_electric_bill).then(function ( data ) {
+			loadAndSave.deleteRecord(form_data, ajax_url.remove_electric_bill, 'jsRentPanel').then(function ( data ) {
 
 				_this.setState({ grid : [], trash : [] }, () => {
 
@@ -963,7 +979,7 @@ class Guest extends React.Component {
 		if(bill_ids.length) {
 			var form_data = { ids : bill_ids, month : this.state.billInput.month, year : this.state.billInput.year };
 
-			loadAndSave.post(form_data, ajax_url.move_to_active_electric_bill).then(function ( data ) {
+			loadAndSave.post(form_data, ajax_url.move_to_active_electric_bill, 'jsRentPanel').then(function ( data ) {
 
 				_this.setState({ grid : [], trash : [] }, () => {
 
@@ -1016,7 +1032,7 @@ class Guest extends React.Component {
 				<div className="col-sm-12 text-center" style={{ fontSize : "25px" }}>
 					<span>{ this.state.dateFormat }</span>&nbsp;&nbsp;&nbsp;
 					<i className="fa fa-calendar" ref="iconDate" onClick={this.showDatepicker.bind(this)} style={{ cursor : "pointer" }}></i>
-					<input type="text" className="form-control hide" ref="datepicker" />
+					<input type="text" className="form-control hide" id="jsMonthPickerEb" ref="datepicker" />
 				</div>
 			</div>
 			<div className="row row-buttons" style={{ "width": this.state.containerWidth + 'px', margin : "0px auto", position : "relative" }}>

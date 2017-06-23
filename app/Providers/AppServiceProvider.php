@@ -26,8 +26,11 @@ class AppServiceProvider extends ServiceProvider
 		public function boot(Request $request)
 		{
 				\View::composer('*', function($view) use ($request) {
-						
+						if (!$request->route()) {
+							return \View('errors.404');
+						}
 						$route_path = $request->route()->getPath();
+						
 						if(\Auth::User()) {
 								$user = \Auth::User();
 								$setting_repo = new SettingsRepository();
@@ -48,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
 								$active_menu = $menu_repo->findByMenuLink($route_path);
 								//print_r($active_menu);die;
 								//print_r($setting);die;
-								$view->with([ 'setting' => $setting, 'menus' => $menus, 'default_avatar' => $default_avatar, 'active_menu' => $active_menu ]);
+								$view->with([ 'setting' => $setting, 'menus' => $menus, 'default_avatar' => $default_avatar, 'active_menu' => $active_menu, 'roles' => $roles ]);
 						}
 						
 						

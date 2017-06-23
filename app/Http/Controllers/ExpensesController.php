@@ -12,6 +12,8 @@ use App\Repositories\ExpenseTypesRepository;
 
 use App\Expenses;
 
+use Helper;
+
 class ExpensesController extends Controller
 {
     /**
@@ -19,13 +21,14 @@ class ExpensesController extends Controller
      *
      * @return void
      */
-	protected $expenses;
+		protected $expenses;
     protected $expense_repo;
     protected $expense_types_repo;
     public function __construct()
     {
         $this->middleware('auth');
-		$this->expenses = new Expenses();
+        $this->middleware('permission');
+				$this->expenses = new Expenses();
         $this->expense_repo = new ExpensesRepository();
         $this->expense_types_repo = new ExpenseTypesRepository();
 
@@ -44,12 +47,19 @@ class ExpensesController extends Controller
         // get all the nerds
         $start_date = date('Y-m-01');
         $end_date = date('Y-m-d');
+        $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+				if (!$report_options['admin_role']) {
+					$start_date = $report_options['start_date'];
+					$end_date = $report_options['end_date'];
+				}
 
         //Create the current month electric bills details.
         $expenses = $this->expense_repo->getExpensesReportBetweenDates($start_date, $end_date);
 
         $total_expenses = $this->expense_repo->getTotalExpensesByDates($start_date, $end_date);
 
+        /*echo "<pre>";
+        print_r($expenses->toArray());die;*/
         // load the view and pass the nerds
         return view('expenses.index')
             ->with(array('expenses' => $expenses, 'total_expenses' => $total_expenses->amount, 'start_date' => $start_date, 'end_date' => $end_date ));

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('htmlheader_title')
     {{ trans('adminlte_lang::message.pagenotfound') }}
@@ -11,7 +11,7 @@
 @section('$contentheader_description')
 @endsection
 
-@section('main-content')
+@section('content')
 
 <div class="error-page">
     <h2 class="headline text-yellow"> 404</h2>

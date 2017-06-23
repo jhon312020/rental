@@ -35,4 +35,20 @@ class Helper
             </li>';
         return $sub_menus;
     }
+
+    public static function checkRoleAndGetDate ($start_date, $end_date) {
+    	$role = \Auth::User()->roles->role_name;
+			if ($role != 'admin') {
+				$report_start_date = \Config::get('constants.REPORT_START_DATE');
+				$report_end_date = \Config::get('constants.REPORT_END_DATE');
+				if ($start_date < $report_start_date || $start_date > $report_end_date) {
+					$start_date = $report_start_date;
+				}
+				if ($end_date < $report_start_date || $end_date > $report_end_date) {
+					$end_date = $report_end_date;
+				}
+				return [ "admin_role" => false, "start_date" => $start_date, "end_date" => $end_date ];
+			}
+			return [ "admin_role" => true ];
+    }
 }

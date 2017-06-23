@@ -5,7 +5,7 @@
 //console.log($.type(formData));
 $(document).ready(function () {
 var guest_ids = [];
-
+var update_incharge = true;
 if($.type(formData) == 'object') {
 	var data = [];
 	$.each(formData, function(key, obj) {
@@ -332,7 +332,6 @@ class Grid extends React.Component {
 
 				 	if(inputType[key]) {
 				 		if(inputType[key] == 'radio') {
-
 				 			headerStyle.textAlign = "center";
 
 				 			return (	
@@ -342,7 +341,7 @@ class Grid extends React.Component {
 					         <span>
 					            <label>
 					            	<input type="hidden" name={"guest[" + trIndex + "][incharge_set]"} value={tr.incharge_set} />
-			                  <input type="checkbox" className="inchargeCheck" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} onChange={this.updateIncharge.bind(this, trIndex)} checked={ tr[key] == 1 && tr.incharge_set == 1 ? true : false } value="1" />
+			                  <input type="checkbox" className="inchargeCheck" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} onChange={this.updateIncharge.bind(this, trIndex)} disabled={update_incharge ? false : true}  checked={ tr[key] == 1 && tr.incharge_set == 1 ? true : false } value="1" />
 			                </label>
 					         </span>
 					      	
@@ -498,7 +497,7 @@ class Guest extends React.Component {
 		
 		var _this = this;
 		$(document).on('change', '.select2', function () {
-
+			update_incharge = true;
 			var form_data = { room_id : $(this).val() ? $(this).val() : 0 };
 			loadAndSave.post(form_data, ajax_url.get_guest_rent).then(function ( data ) {
 				
@@ -516,10 +515,18 @@ class Guest extends React.Component {
 						data.guests.filter(function ( arr, index ) {
 							return arr.is_incharge == 1;
 						});
+				var is_group_guests = 
+						data.guests.filter(function ( arr, index ) {
+							return arr.incharge_set == 1;
+						});
+
+				if (data.guests.length) {
+					update_incharge = false;
+				}
 
 				$.each(_this.state.newRow, function ( i, v) {
 
-					if(is_incharge_old.length) {
+					if(is_incharge_old.length || !update_incharge) {
 						v.is_incharge = 0;
 					}
 

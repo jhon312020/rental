@@ -72,6 +72,9 @@
 <!-- Numerical -->
 <script src="{{ asset('plugins/numerical/js/numeral.min.js') }}" type="text/javascript"></script>
 
+<!-- Boostrap confirmation -->
+<script src="{{ asset('plugins/boostrap-confirmation/js/bootstrap-confirmation.min.js') }}" type="text/javascript"></script>
+
 <!-- Materialize js -->
 <!--<script src="{{ asset('plugins/materialize/js/materialize.js') }}" type="text/javascript"></script>-->
 

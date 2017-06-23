@@ -61,6 +61,23 @@ class RentsController extends Controller
 			->with(array('rents' => $rents));
 	}
 	/**
+	 * Display a listing of the rents.
+	 *
+	 * @return Response
+	*/
+	public function settledRents ()
+	{
+		// get all the nerds
+		$rents = $this->rent_repo->allSettled();
+
+		/*echo "<pre>";
+		print_r($rents);die;*/
+
+		// load the view and pass the nerds
+		return view('rents.settled_rents')
+			->with(array('rents' => $rents));
+	}
+	/**
 	 * Show the form for creating a new resource.
 	 *
 	 * @return Response
@@ -179,9 +196,14 @@ class RentsController extends Controller
 	   // get the nerd
 		$rent = $this->rent_repo->getGuestDetailsForRoom([ 'room_id' => $room_id ])->toArray();
 
-		$room = $this->room_repo->getActiveRoomById($room_id)->toArray();
-
-		//print_r($room);die;
+		$room = $this->room_repo->getActiveRoomById($room_id);
+		if ($room) {
+			$room_result = $room->toArray();
+		} else {
+			return view('errors.500');
+		}
+		/*echo "<pre>";
+		print_r($rent);die;*/
 
 		if($room) {
 			// show the edit form and pass the nerd

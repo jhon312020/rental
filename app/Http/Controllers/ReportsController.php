@@ -28,6 +28,8 @@ use App\Repositories\ExpensesRepository;
 
 use App\Repositories\GuestsRepository;
 
+use Helper;
+
 class ReportsController extends Controller
 {
 		/**
@@ -44,6 +46,7 @@ class ReportsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('permission');
         $this->rents = new Rents();
         $this->incomes = new Incomes();
         $this->bills = new ElectricityBill();
@@ -113,7 +116,7 @@ class ReportsController extends Controller
 
       //print_r($rent_monthly);die;
        return view('reports.guests_rent')
-            ->with([ 'rent_monthly' => $rent_monthly, 'start_date' => $start_date, 'end_date' => $end_date, ]);
+            ->with([ 'rent_monthly' => $rent_monthly, 'start_date' => $start_date, 'end_date' => $end_date, "month_year" => date('F-Y', strtotime($previous_month)) ]);
     }
 
     /**
@@ -129,9 +132,6 @@ class ReportsController extends Controller
 
         $start_date = date('Y-m-01');
         $end_date = date('Y-m-d');
-
-        //Create the current month electric bills details.
-        $monthly_income_report = $this->income_repo->getIncomesReportBetweenDates($start_date, $end_date);
 
         $monthly_income_report_by_date = $this->income_repo->getMonthlyIncomesByDateReport($start_date);
 
@@ -158,6 +158,15 @@ class ReportsController extends Controller
         $yearly_x_axis = array_keys($yearly_income_report_by_month[0]);
 
         $total_yearly_income = $this->income_repo->getTotalYearlyIncomes($year);
+
+        $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+				if (!$report_options['admin_role']) {
+					$start_date = $report_options['start_date'];
+					$end_date = $report_options['end_date'];
+				}
+
+        //Create the current month electric bills details.
+        $monthly_income_report = $this->income_repo->getIncomesReportBetweenDates($start_date, $end_date);
 
         $total_incomes_between_date = $this->income_repo->getTotalIncomesByDates($start_date, $end_date);
 
@@ -186,9 +195,6 @@ class ReportsController extends Controller
         $start_date = date('Y-m-01');
         $end_date = date('Y-m-d');
 
-        //Create the current month electric bills details.
-        $monthly_expense_report = $this->expense_repo->getExpensesReportBetweenDates($start_date, $end_date);
-
         $monthly_expense_report_by_date = $this->expense_repo->getMonthlyExpensesByDateReport($start_date);
 
         $monthly_expense_report_by_date = json_decode(json_encode($monthly_expense_report_by_date), true);
@@ -215,6 +221,15 @@ class ReportsController extends Controller
 
         
         $yearly_y_axis = json_encode(array_values($yearly_expense_report_by_month[0]), JSON_NUMERIC_CHECK);
+
+        $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+				if (!$report_options['admin_role']) {
+					$start_date = $report_options['start_date'];
+					$end_date = $report_options['end_date'];
+				}
+
+				//Create the current month electric bills details.
+        $monthly_expense_report = $this->expense_repo->getExpensesReportBetweenDates($start_date, $end_date);
 
         $total_expenses_between_date = $this->expense_repo->getTotalExpensesByDates($start_date, $end_date);
 

@@ -12,8 +12,8 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{ trans('message.income_lists') }}</div>
-					<div class="panel-body">
+					<div class="panel-heading">{{ trans('message.income_lists') }} from <span id="jsReportDateSpan"><?php echo date('d/m/Y', strtotime($start_date)).' to '.date('d/m/Y', strtotime($end_date)); ?></div>
+					<div class="panel-body" id="jsReportPanel">
 						<!-- will be used to show any messages -->
 						@include('layouts.common.messages')
 						<div class="row min-height">
@@ -32,7 +32,7 @@
 		                    <i class="fa fa-calendar"></i>
 		                  </div>
 
-		                  <input type="text" class="form-control pull-right dateRange" id="reservation" value="<?php echo date('01/m/Y').' - '.date('d/m/Y'); ?>">
+		                  <input type="text" class="form-control pull-right dateRange" id="reservation" value="<?php echo date('d/m/Y', strtotime($start_date)).' - '.date('d/m/Y', strtotime($end_date)); ?>">
 		                  <span class="input-group-btn">
 								        <button class="btn btn-secondary searchReport" type="button"><i class="fa fa-search"></i> Search</button>
 								      </span>
@@ -137,12 +137,23 @@ var columns_defs = {
     		var $income_url = "{{ URL::to('incomes/') }}";
     		var $edit_url = $income_url + '/' + full.id + '/edit';
     		var $delete_url = $income_url + '/' + full.id + '/destroy';
-   			return '<a href="' + $edit_url + '" class="btn btn-info btn-sm">'+
-								'<span class="glyphicon glyphicon-edit"></span>'+
-							'</a>'+
+    		if (full.income_type == 'Rent') {
+    			return '';
+    		} else {
+	   			var html = 
+	   						'<a href="' + $edit_url + '" class="btn btn-info btn-sm">'+
+									'<span class="glyphicon glyphicon-edit"></span>'+
+								'</a>';
+					if (full.income_type == 'Advance') {
+						return html;
+					} else {
+						html +=	
 							'<a href="javascript:;" data-href="' + $delete_url + '" class="btn btn-danger btn-sm jsDelete" style="margin-left:5px;">'+
 								'<span class="glyphicon glyphicon-trash"></span>'+
 							'</a>';
+						return html;
+					}
+				}
     	}
     }
 	]

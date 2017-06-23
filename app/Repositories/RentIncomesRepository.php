@@ -140,4 +140,40 @@ class RentIncomesRepository
         
         return [  "messages" => $query->get()->toArray() ];
     }
+    /**
+     * Check if the rent income exists for the particular rent.
+     *
+     * @param  array  $rent_ids
+     * @return bool|null
+     * @throws \Exception
+     */
+    public function checkRentIncomeExists($rent_ids)
+    {
+    	$chcek_incharge = Rents::select("id", "room_id")
+    											->where([ "is_active" => 1, "incharge_set" => 1, "is_incharge" => 0 ])
+    											->whereIn('id', $rent_ids);
+    											//->get()->toArray();
+    	$is_incharge = false;
+    	if ($chcek_incharge->count()) {
+    		$rents = $chcek_incharge->get()->toArray();
+    		$room_ids = array_column($rents, 'room_id');
+    		$rent_incharge_ids = Rents::select('id')
+  														->where([ "is_active" => 1, "incharge_set" => 1, "is_incharge" => 1 ])
+  														->whereIn('room_id', $room_ids)
+  														->get()
+  														->toArray();
+    		$rent_ids = array_merge($rent_ids, array_column($rent_incharge_ids, "id"));
+    		$is_incharge = true;
+    	}
+    	$rent_incomes =  RentIncomes::select('rent_id')
+				    						->where([ "is_active" => 1])
+				    						->whereIn('rent_id', $rent_ids)
+				    						->groupBy('rent_id');
+			if($rent_incomes->count()) {
+				$rents = $rent_incomes->get()->toArray();
+				return [ "exists" => true, "rent_ids" => array_column($rents, 'rent_id'), "is_incharge" => $is_incharge ];
+			}
+
+			return [ "exists" => false ];
+    }
 }

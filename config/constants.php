@@ -37,6 +37,9 @@ return array(
     */
     'ADVANCE' => 1,
     'RENT' => 2,
+    'SETTLEMENT' => 1,
     'INCOME_EDIT' => ['1'],
     'EXPENSE_EDIT' => ['1'],
+    'REPORT_START_DATE' => date('Y-m-d', strtotime("-2 days")),
+    'REPORT_END_DATE' => date('Y-m-d')
 );

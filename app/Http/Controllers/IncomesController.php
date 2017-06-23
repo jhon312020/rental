@@ -12,6 +12,8 @@ use App\Repositories\IncomeTypesRepository;
 
 use App\Incomes;
 
+use Helper;
+
 class IncomesController extends Controller
 {
     /**
@@ -25,7 +27,8 @@ class IncomesController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-		$this->incomes = new Incomes();
+        $this->middleware('permission');
+				$this->incomes = new Incomes();
         $this->income_repo = new IncomesRepository();
         $this->income_types_repo = new IncomeTypesRepository();
 
@@ -44,6 +47,12 @@ class IncomesController extends Controller
         // get all the nerds
         $start_date = date('Y-m-01');
         $end_date = date('Y-m-d');
+
+        $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+				if (!$report_options['admin_role']) {
+					$start_date = $report_options['start_date'];
+					$end_date = $report_options['end_date'];
+				}
 
         //Create the current month electric bills details.
         $incomes = $this->income_repo->getIncomesReportBetweenDates($start_date, $end_date);

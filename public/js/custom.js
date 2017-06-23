@@ -11,6 +11,8 @@
  * @license MIT <http://megamind.org>
  */
 $(document).ready(function() {
+	var advance_amount = 0;
+	var current_settle_details = null;
 	var buttonCommon = 
 		{
       exportOptions: {
@@ -98,13 +100,15 @@ $(document).ready(function() {
 		    		end_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-' + ev.date.getDate();
 		    		start_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-01';
 		    		$('#monthText').text(str);
+
+		    		$('#jsMonthReportSpan').text(str);
 		    		//console.log(str)
 
 		    		old_month = str;
 		    		if (typeof month_report_ajax_url != 'undefined') {
 			    		var form_data = { start_date : start_date };
 			    			//console.log(form_data)
-			    		loadAndSave.post(form_data, month_report_ajax_url).then(function ( data ) {
+			    		loadAndSave.post(form_data, month_report_ajax_url, 'jsReportChartMonthPanel').then(function ( data ) {
 			    			//console.log($.parseJSON(data.y_axis))
 
 			    			monthChart.setTitle({text : "Income report for the month of " + str });
@@ -143,10 +147,10 @@ $(document).ready(function() {
 				const year_str = ev.date.getFullYear();
 				if(old_year != year_str) {
 					$('#yearText').text(year_str);
-
+					$('#jsYearReportSpan').text(year_str);
 					var form_data = { year : year_str };
 	    			//console.log(form_data)
-	    		loadAndSave.post(form_data, year_report_ajax_url).then(function ( data ) {
+	    		loadAndSave.post(form_data, year_report_ajax_url, 'jsReportChartYearPanel').then(function ( data ) {
 	    			//console.log($.parseJSON(data.y_axis))
 
 	    			yearChart.setTitle({text : "Income report for the year of " + year_str });
@@ -202,12 +206,12 @@ $(document).ready(function() {
 		    		end_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-' + ev.date.getDate();
 		    		start_date = ev.date.getFullYear() + '-' + parseInt(ev.date.getMonth() + 1) + '-01';
 		    		$('#monthText').text(str);
-
+		    		$('#jsReportMonthSpan').text(str);
+		    		
 		    		old_month = str;
 
 		    		var form_data = { type : $('[name="report_type"]:checked').val(), start_date : start_date, end_date : end_date };
-		    			console.log(form_data)
-		    		loadAndSave.post(form_data, month_change_ajax_url).then(function ( data ) {
+		    		loadAndSave.post(form_data, month_change_ajax_url, 'jsReportPanel').then(function ( data ) {
 		    			reportTable.clear().draw();
 		    			if(data.report_result.length) {
       					reportTable.rows.add(data.report_result).draw();
@@ -224,36 +228,40 @@ $(document).ready(function() {
 			$('.monthPicker').datepicker('show');
 		})
 	}
-
-	$('.dateRange').daterangepicker({
-		format : "DD/MM/YYYY",
-	});
+	var range_object = 
+		{
+			locale : {
+				format : "DD/MM/YYYY",
+			},
+		};
+	if (!is_admin && typeof max_min_range == 'undefined') {
+		range_object['minDate'] = report_start_date;
+		range_object['maxDate'] = report_end_date;
+	}
+	$('.dateRange').daterangepicker(range_object);
 
 	$(document).on('click', '.searchReport', function( event ) {
 		var date = $('.dateRange').val().split(' - ');
-
 		var form_data = { start_date : date[0], end_date : date[1] };
 		if (typeof custom_form_data != 'undefined') {
 			Object.assign(form_data, custom_form_data);
 		}
-		console.log(form_data)
-		loadAndSave.post(form_data, repot_between_date).then(function ( data ) {
+		loadAndSave.post(form_data, repot_between_date, 'jsReportPanel').then(function ( data ) {
 			reportTable.clear().draw();
       if(data.monthly_report.length) {
         reportTable.rows.add(data.monthly_report).draw();
       }
-      console.log(typeof data.total_amount)
+      if (typeof data.start_date == 'string') {
+      	$('#jsReportDateSpan').text(data.start_date + ' to ' + data.end_date);
+      }
       if (typeof data.total_amount == 'string') {
       	$('#total_amount_date').text(numeral(data.total_amount).format('0,0'));
     	}
     	if (typeof data.total_amount == 'object') {
       	$.each(data.total_amount, function (key, value) {
-      		console.log(key, value)
       		$('#' + key).text(value);
       	})
     	}
-
-      
 		}).fail(function( error ) {
 
 		})
@@ -261,13 +269,10 @@ $(document).ready(function() {
 
 	$(document).on('change', '[name="report_type"]', function(e) {
     var form_data = { type : $(this).val(), start_date : start_date, end_date : end_date };
-
-    console.log(reportTable)
-
-    loadAndSave.post(form_data, month_change_ajax_url).then(function ( data ) {
+    $('#jsRoomReportSpan').text($(this).data('text'));
+    loadAndSave.post(form_data, month_change_ajax_url, 'jsReportPanel').then(function ( data ) {
       reportTable.clear().draw();
       if(data.report_result.length) {
-        console.log('table')
         reportTable.rows.add(data.report_result).draw();
       }
     }).fail(function ( error ) {
@@ -401,7 +406,7 @@ $(document).ready(function() {
 		rent_id = ele.data('id');
 		advance = ele.closest('tr').find('td:nth-child(3)').text();
 		var url = ajax_url.get_guest_details.replace("guest_id", rent_id);
-		loadAndSave.get([], url).then(function (data) {
+		loadAndSave.get([], url, 'jsSettlmentPanel').then(function (data) {
 			$.each(data.guest_income, function (key, value) {
 				$('#' + key).text(value);
 			});
@@ -417,9 +422,14 @@ $(document).ready(function() {
 						'</div>');
 				});
 			}
-
+			var rent_details = data.rent_details;
 			$('#advance').text(advance);
+			advance_amount = advance;
+			$('#checkin_date').text(rent_details.checkin_date);
 			$('#advance_amount').val(advance);
+			$('#jsPendingSpan').text(data.guest_income.balance);
+			$('#jsRemainingBalanceSpan, #jsReturnSpan').text(0);
+			$('#jsAdvanceSpan').text(advance);
 			$('#settlementModal').modal('show');
 		}).fail(function ( error ) {
 			if(error && error.msg && error.msg[0]) {
@@ -434,6 +444,8 @@ $(document).ready(function() {
 		loadAndSave.post(form_data, ajax_url.update_settlement).then(function (data) {
 			table_row.remove().draw();
 			if (data.msg) {
+				$('#settlementModal').modal('hide');
+				commonFunctions.resetForm('settlementModal');
 				jqueryValidate.renderSuccessToast(data.msg);
 			}
 		}).fail(function ( error ) {
@@ -482,15 +494,72 @@ $(document).ready(function() {
 											'<td>' + value.advance + '</td>'+
 											'<td>' + value.checkin_date + '</td>'+
 											'<td>'+
-											'<a target="_blank" href="' + APP_URL + '/reports/' + value.id + '/guest-income" class="btn btn-info btn-sm" style="margin-right:3px;" data-toggle="tooltip" title="View payment details">'+
+											'<a target="_blank" href="' + APP_URL + '/reports/' + value.guest_id + '/guest-income" class="btn btn-info btn-sm" style="margin-right:3px;" data-toggle="tooltip" title="View payment details">'+
 												'<span class="glyphicon glyphicon-info-sign"></span>'+
 											'</a>'+
 											'<a href="' + APP_URL + '/rents/' + value.id + '/edit" class="btn btn-info btn-sm" style="margin-right:3px;">'+
 												'<span class="glyphicon glyphicon-edit"></span>'+
 											'</a>'+
-											'<a href="javascript:;" data-href="' + APP_URL + '/rents/' + value.id + '/destroy" class="btn btn-danger btn-sm jsDelete">'+
+											(value.is_remove ? '<a href="javascript:;" data-href="' + APP_URL + '/rents/' + value.id + '/destroy" class="btn btn-danger btn-sm jsDelete">'+
 												'<span class="glyphicon glyphicon-trash"></span>'+
-											'</a>'+
+											'</a>' : '')+
+										'</tr>';
+									});
+									
+								html += 
+								'</tbody>'+
+							'</table>'+
+						'</div>'+
+					'</td>'+
+				'</tr>';
+			
+			ele.after(html);
+			$('.duplicateRow').slideDown('slow');
+      $('.duplicateDiv').slideDown('slow');
+		})
+	})
+
+	$(document).on('click', '.settle_table tbody tr.details-row', function () {
+		var formData = { room_id : $(this).data('room-id') }
+		var ele = $(this);
+		$('.duplicateDiv').slideUp('slow', function(){
+			$('.duplicateRow').remove();
+		});
+		var bgColor = "#fff";
+		
+		loadAndSave.post(formData, ajax_url.get_settle_rent).then(function (data) {
+			
+			var html = 
+				'<tr class="duplicateRow" style="display:none;background:' + bgColor + '">'+
+					'<td colspan=6>'+
+						'<div class="col-sm-12 duplicateDiv" style="display:none;">'+
+							'<table class="table table-striped table-bordered">'+
+								'<thead>'+
+									'<tr>'+
+										'<th>Name</th>'+
+										'<th>Email</th>'+
+										'<th>Mobile no</th>'+
+										'<th>Advance</th>'+
+										'<th>Checkin date</th>'+
+										'<th>Checkout date</th>'+
+										'<th>Action</th>'+
+									'</tr>'+
+								'</thead>'+
+								'<tbody>';
+									$.each(data.guests, function( index, value ) {
+										html += 
+										'<tr>'+
+											'<td>' + value.name + '</td>'+
+											'<td>' + value.email + '</td>'+
+											'<td>' + value.mobile_no + '</td>'+
+											'<td>' + value.advance + '</td>'+
+											'<td>' + value.checkin_date + '</td>'+
+											'<td>' + value.checkout_date + '</td>'+
+											'<td>'+
+												'<a target="_blank" href="' + APP_URL + '/reports/' + value.guest_id + '/guest-income" class="btn btn-info btn-sm" style="margin-right:3px;" data-toggle="tooltip" title="View payment details">'+
+													'<span class="glyphicon glyphicon-info-sign"></span>'+
+												'</a>'+
+											'</td>'+
 										'</tr>';
 									});
 									
@@ -563,5 +632,35 @@ $(document).ready(function() {
 		$('[name="send_message"]').val(1);
 		$('.jsDateForm').submit();
 	})
+
+	$(document).on('click', "#jsSettlementCheck", function () {
+		current_settle_details = null;
+		var form_data = { rent_id : rent_id, checkout_date : $('#checkout_date').val() };
+		var url = ajax_url.get_settlement;
+		loadAndSave.post(form_data, url, 'jsSettlmentPanel').then(function (data) {
+			current_settle_details = data.amount;
+			commonFunctions.updateSettlement(current_settle_details, advance_amount, false);
+		}).fail(function ( error ) {
+			if(error.error) {
+				var msg = error.error[0];
+				jqueryValidate.renderErrorToast(msg);
+			}
+		})
+
+	})
 	
-})
+	$(document).on('shown.bs.modal', '#settlementModal', function (event) {
+		current_settle_details = null;
+	})
+	$(document).on('change', ".jsCurrentAmount", function () {
+		if (current_settle_details) {
+			commonFunctions.updateSettlement(current_settle_details, advance_amount, true)
+		}
+	});
+	
+	$('[data-toggle=confirmation]').confirmation({
+    rootSelector: '[data-toggle=confirmation]',
+    container: 'body'
+  });
+  
+});

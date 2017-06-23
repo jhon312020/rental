@@ -48,7 +48,7 @@
 			<div class="col-md-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">{{trans('message.rent_monthly_report')}}</div>
-					<div class="panel-body">
+					<div class="panel-body" id="jsRentPanel">
 						<div class="col-sm-12">
 							<!-- if there are creation errors, they will show here-->
 							<!--{{ HTML::ul($errors->all()) }}-->

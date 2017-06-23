@@ -57,9 +57,9 @@
 													<a href="{{ URL::to('rents/' . $value->id . '/edit') }}" class="btn btn-info btn-sm">
 														<span class="glyphicon glyphicon-edit"></span>
 													</a>
-													<a href="javascript:;" data-href="{{ URL::to('rents/' . $value->id . '/destroy') }}" class="btn btn-danger btn-sm jsDelete">
+													<!-- <a href="javascript:;" data-href="{{ URL::to('rents/' . $value->id . '/destroy') }}" class="btn btn-danger btn-sm jsDelete">
 														<span class="glyphicon glyphicon-trash"></span>
-													</a>
+													</a> -->
 													<!-- edit this nerd (uses the edit method found at GET /nerds/{id}/edit -->
 													</td>
 												</tr>
@@ -82,7 +82,7 @@
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 		        <h4 class="modal-title" id="myModalLabel">{{trans('message.settlement')}}</h4>
 		      </div>
-		      <div class="modal-body">
+		      <div class="modal-body" id="jsSettlmentPanel">
 		      	<div class="row">
       			<div class="col-sm-6 pad-15" style="background:#f3b44c;">
 		    			<span>Advance:&nbsp;₹&nbsp;<span id="advance">0</span></span>
@@ -103,41 +103,72 @@
 			            <div class="row form-top">
 			              <div class="col-sm-12">
 			              	<label>Checkout date</label>
-			              	<input type="text" name="checkout_date" id="checkout_date" class="form-control datepicker" />
+			              	 <div class="input-group">
+										      <input type="text" name="checkout_date" id="checkout_date" class="form-control datepicker" data-date-end-date="<?php echo date('d/m/Y'); ?>">
+										      <span class="input-group-btn">
+										        <button class="btn btn-secondary" id="jsSettlementCheck" type="button">Check</button>
+										      </span>
+										    </div>
+			              	<!-- <input type="text" name="checkout_date" id="checkout_date" class="form-control datepicker" /> -->
 			              </div>
 			            </div>
 			            <div class="row form-top">
 			              <div class="col-sm-12">
-			              	<label>Amount</label>
-			              	<input type="text" name="amount" id="amount" class="form-control" />
+			              	<label>Current month rent amount</label>
+			              	<input type="text" name="amount" id="amount" class="form-control jsCurrentAmount" />
 			              </div>
 			            </div>
 			            <div class="row form-top">
+			              <div class="col-sm-12">
+			              	<label>Current month electricity</label>
+			              	<input type="text" name="electricity_amount" id="electricity_amount" class="form-control jsCurrentAmount" />
+			              </div>
+			            </div>
+			            <!-- <div class="row form-top">
 			              <div class="col-sm-12">
 			              	<label>Advance</label>
 			              	<input type="text" name="advance" id="advance_amount" class="form-control" />
 			              </div>
-			            </div>
+			            </div> -->
 			            
 			          </div>
 			        </div>
-			        <div class="col-sm-6" style="margin-top:20px;">
+			        <!-- <div class="col-sm-6" style="margin-top:20px;">
 			        	<fieldset>
 			        		<legend>List of group guests:</legend>
 			        	<div class="form-group" style="margin-bottom:0px;">
-			        	<div class="row" style="margin-left:15px;">
-									  <div class="col-sm-12 span12 jsIncharge">
-									 </div>
+				        	<div class="row" style="margin-left:15px;">
+										  <div class="col-sm-12 span12 jsIncharge">
+										 </div>
+										</div>
 									</div>
-								</div>
-							</fieldset>
-			        </div>
+								</fieldset>
+			        </div> -->
+			        <div class="col-sm-6 pad-15" style="margin-top:20px;">
+			    			<div class="table-p">
+				    			<p class="table-tr">
+				    				<span class="table-td">Checkin date </span><span class="table-td" id="checkin_date"></span>
+				    			</p>
+				    			<p class="table-tr">
+				    				<span class="table-td">Pending amount </span>(+)<span class="table-td" id="jsPendingSpan"></span>
+				    			</p>
+				    			<p class="table-tr">
+				    				<span class="table-td">Advance </span>(-)<span class="table-td" id="jsAdvanceSpan"></span>
+				    			</p>
+				    			<p class="table-tr">
+				    				<span class="table-td">Remaining balance amount </span>(=)<span class="table-td" id="jsRemainingBalanceSpan"></span>
+				    			</p>
+				    			<p class="table-tr">
+				    				<span class="table-td">Balance return to user </span>(=)<span class="table-td" id="jsReturnSpan"></span>
+				    			</p>
+			    			</div>
+			    		</div>
 			        </form>
 		      </div>
 		    </div>
 		      <div class="modal-footer">
 		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        <button type="button" class="btn btn-primary jsSettlementSubmit">Save changes</button>
+		        <button type="button" class="btn btn-primary jsSettlementSubmit">Settle</button>
 		      </div>
 		    </div>
 		  </div>

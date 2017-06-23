@@ -61,7 +61,19 @@
 								      </h4>
 								   </div>
 								   <div id="collapse1" class="panel-collapse collapse in">
-								      <div class="panel-body">
+								      <div class="panel-body" id="jsRentPanel">
+								      	<div class="row min-height" id="jsBillUpdateDiv" style="display:none;">
+													<div class="col-sm-12" height="60px">
+														<button class="btn btn-large btn-primary pull-right" data-toggle="confirmation"
+														        data-btn-ok-label="Continue" data-btn-ok-icon="glyphicon glyphicon-share-alt"
+														        data-btn-ok-class="btn-success"
+														        data-btn-cancel-label="Stoooop!" data-btn-cancel-icon="glyphicon glyphicon-ban-circle"
+														        data-btn-cancel-class="btn-danger"
+														        data-title="Is it ok?" data-content="This will reflect the particular active room rent details.">
+														  Do you want to update the same into rental details?
+														</button>
+													</div>
+												</div>
 								        <div class="form-group">
 										       <div class="row form-top">
 										        <div class="col-sm-12">

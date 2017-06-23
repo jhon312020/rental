@@ -12,19 +12,19 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.rent_report')}}</div>
-					<div class="panel-body">
+					<div class="panel-heading">{{trans('message.rent_report')}} for <span id="jsRoomReportSpan">all</span> guests in the month of <span id="jsReportMonthSpan"><?php echo $month_year; ?></div>
+					<div class="panel-body" id="jsReportPanel">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 							<div class="btn-group" data-toggle="buttons">
 								<label class="btn btn-primary active">
-				            <input type="radio" name="report_type" checked value="all"> All
+				            <input type="radio" name="report_type" checked value="all" data-text="all"> All
 				        </label>
 				        <label class="btn btn-primary">
-				            <input type="radio" name="report_type" value="paid"> Paid guests
+				            <input type="radio" name="report_type" value="paid" data-text="paid"> Paid guests
 				        </label>
 				        <label class="btn btn-primary">
-				            <input type="radio" name="report_type" value="unpaid"> Unpaid guests
+				            <input type="radio" name="report_type" value="unpaid" data-text="unpaid"> Unpaid guests
 				        </label>
 				        
 				    	</div>

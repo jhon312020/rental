@@ -61,13 +61,16 @@
   <link rel="stylesheet" href="{{ asset('/plugins/toast/css/jquery.toast.css') }}">
 
   <!-- Date range picker css -->
-  <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker-bs3.css') }}">
+  <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
 
   <!-- Dashboard css -->
   <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 
   <!-- Animation css -->
   <link rel="stylesheet" href="{{ asset('plugins/animation/css/animate.min.css') }}">
+
+  <!-- google loader css -->
+  <link rel="stylesheet" href="{{ asset('css/loader.css') }}">
 
   <!-- Materialize css -->
   <!--<link rel="stylesheet" href="{{ asset('plugins/materialize/css/materialize.css') }}">-->
@@ -87,7 +90,14 @@
         }
       });
       var active_menu = {!! isset($active_menu) ? json_encode($active_menu) : json_encode([]) !!};
-      var APP_URL = {!! json_encode(url('/')) !!}
+      var APP_URL = {!! json_encode(url('/')) !!};
+      var is_admin = {!! isset($roles) && $roles->role_name == 'admin' ? 1 : 0 !!};
+      var report_start_date = "{{ date('d/m/Y') }}";
+      var report_end_date = "{{ date('d/m/Y') }}";
+      if (!is_admin) {
+      	report_start_date = "{{ date('d/m/Y', strtotime('-2 days')) }}";
+      	report_end_date = "{{ date('d/m/Y') }}";
+      }
       var ajax_url = { 
               rent_serach : "{{action('GuestsController@getGuestByKey')}}",
               bill_create : "{{action('AjaxController@createNewBill')}}",
@@ -127,6 +137,9 @@
               get_guest_income_report_between_date : "{{action('AjaxController@getGuestIncomeBetweenDate')}}",
               get_guest_details : "{{action('AjaxController@getGuestDetails', 'guest_id')}}",
               update_settlement : "{{action('AjaxController@updateSettlement')}}",
+              get_settlement : "{{action('AjaxController@calculateSettlement')}}",
+              update_electricity_rent : "{{action('AjaxController@updateElectricityBillToRent')}}",
+              get_settle_rent : "{{action('AjaxController@getSettledGuestDetailsForRoom')}}",
           };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

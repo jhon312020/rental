@@ -23,6 +23,7 @@ return [
 	'users' => 'Users',
 	'settings_page' => 'Settings',
 	'rents_page' => 'Rents',
+	'notes' => 'Notes',
 
 
 	/* page title start */
@@ -148,6 +149,17 @@ return [
 		'settlement' => 'Settlement',
 		/*settlement page end*/
 
+		/* Notes page */
+		'notes_lists' => 'Notes lists',
+		'notes_new' => 'Notes new',
+		'notes_update' => 'Notes update',
+		'notes_create' => 'Notes create',
+		/* Notes page end */
+
+		/* Settlement page start */
+		'settled_rent_lists' => 'Settled rent lists',
+		/* Settlement page end */
+
 	/* page title end */
 
 
@@ -209,6 +221,12 @@ return [
 		/* User start */
 		'user_update_password_success' => 'Password updated successfully!',
 		/* User end */
+
+		/* Notes start */
+		'notes_remove_success' => 'Notes successfully removed!',
+		'notes_update_success' => 'Notes updated successfully!',
+		'notes_create_success' => 'New notes created successfully!',
+		/* Notes end */
 
 	/* Success and error messages end */
 
@@ -304,6 +322,10 @@ return [
 		'no_of_person_stayed_current_month' => 'No of persons stayed in current month',
 		/* Room report end */        
 
+		/* Notes label start */
+		'date_of_notes' => 'Date of notes',
+		/* Notes label end */
+
 	/* label name end */
 
 
@@ -365,6 +387,12 @@ return [
 		/* User button label start*/
 		'update_password' => 'Update password!',
 		/* User label end*/
+
+		/* Notes button label start*/
+		'create_notes' => 'Create the notes!',
+		'update_notes' => 'Update the notes!',
+		'new_notes' => 'New notes',
+		/* Notes button label end*/
 
 	/* Button text end */
 

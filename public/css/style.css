@@ -41,7 +41,7 @@
   z-index : 999;
   resize:none;
 }
-.rent_table tbody tr {
+.rent_table tbody tr, .settle_table tbody tr {
   cursor: pointer;
 }
 .duplicateRow, .duplicateRow tr {
@@ -686,4 +686,25 @@ legend {
 }
 .dataTables_wrapper {
   margin-top: 15px !important;
+}
+.table-p {
+	display: table;
+	margin: auto;
+}
+.table-tr {
+	display: table-row;
+	line-height: 40px;
+}
+.table-td {
+	display: table-cell;
+}
+
+.black-overlay {
+  position: absolute;
+  z-index: 999;
+  width: 300px;
+  height: 300px;
+  overflow: visible;
+  /*background: rgba(1,1,1,0.5);*/
+  background: rgba(39,62,84,0.82);
 }

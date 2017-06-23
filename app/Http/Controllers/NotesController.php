@@ -6,41 +6,41 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
-use App\Repositories\IncomeTypesRepository;
+use App\Notes;
 
-use App\IncomeTypes;
+use App\Repositories\NotesRepository;
 
-class IncomeTypesController extends Controller
+class NotesController extends Controller
 {
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-	protected $income_types;
-    protected $income_types_repo;
+	protected $notes;
+    protected $notes_repo;
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware('permission');
-		$this->income_types = new IncomeTypes();
-        $this->income_types_repo = new IncomeTypesRepository();
+		$this->notes = new Notes();
+        $this->notes_repo = new NotesRepository();
 
-        //\View::share('page_name_active', trans('message.income_types'));
+        //\View::share('page_name_active', trans('message.notes'));
     }
     /**
-     * Display a listing of the income-types.
+     * Display a listing of the notes.
      *
      * @return Response
     */
     public function index()
     {
         // get all the nerds
-        $income_types = $this->income_types_repo->allActiveEdit();
+        $notes = $this->notes_repo->allActive();
 
         // load the view and pass the nerds
-        return view('income-types.index')
-            ->with(array('income_types' => $income_types));
+        return view('notes.index')
+            ->with(array('notes' => $notes));
     }
 	/**
      * Show the form for creating a new resource.
@@ -50,7 +50,7 @@ class IncomeTypesController extends Controller
     public function create()
     {
         // load the create form (app/views/nerds/create.blade.php)
-        return view('income-types.create');
+        return view('notes.create');
     }
 	/**
      * Store a newly created resource in storage.
@@ -60,13 +60,13 @@ class IncomeTypesController extends Controller
     public function store(Request $request)
     {
 		$data = $request->all();
-		$valid = $this->income_types->validate($data);
+		$valid = $this->notes->validate($data);
 		if($valid) {
-			$this->income_types->insertOrUpdate($data);
+			$this->notes->insertOrUpdate($data);
 			// redirect
-			return \Redirect::to('income-types');
+			return \Redirect::to('notes');
 		} else {
-			$errors = $this->income_types->errors();
+			$errors = $this->notes->errors();
 			return redirect()->back()->withErrors($errors)->withInput();
 		}
     }
@@ -89,16 +89,12 @@ class IncomeTypesController extends Controller
      */
     public function edit($id)
     {
-        $editable = \Config::get('constants.INCOME_EDIT');
-        if(in_array($id, $editable)) {
-            return \Redirect::to('income-types');
-        }
         // get the nerd
-        $income_type = $this->income_types->find($id);
-        //print_r($income_type);die;
+        $notes = $this->notes->find($id);
+        //print_r($guest);die;
         // show the edit form and pass the nerd
-        return view('income-types.edit')
-            ->with(['income_type' => $income_type]);
+        return view('notes.edit')
+            ->with(['notes' => $notes]);
     }
 
     /**
@@ -111,13 +107,13 @@ class IncomeTypesController extends Controller
     {
         $data = $request->all();
         $data['id'] = $id;
-        $valid = $this->income_types->validate($data);
+        $valid = $this->notes->validate($data);
         if($valid) {
-            $this->income_types->insertOrUpdate($data);
+            $this->notes->insertOrUpdate($data);
             // redirect
-            return \Redirect::to('income-types');
+            return \Redirect::to('notes');
         } else {
-            $errors = $this->income_types->errors();
+            $errors = $this->notes->errors();
             return redirect()->back()->withErrors($errors)->withInput();
         }
     }
@@ -130,8 +126,8 @@ class IncomeTypesController extends Controller
     public function destroy($id)
     {
        $data = array('is_active' => 0, 'id' => $id);
-       $this->income_types->insertOrUpdate($data);
-       \Session::flash('message', trans('message.income_type_remove_success'));
-       return \Redirect::to('income-types');
+       $this->notes->insertOrUpdate($data);
+       \Session::flash('message', trans('message.notes_remove_success'));
+       return \Redirect::to('notes');
     }
 }

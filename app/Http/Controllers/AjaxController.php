@@ -12,6 +12,8 @@ use App\Repositories\RoomsRepository;
 
 use App\Repositories\IncomesRepository;
 
+use App\Repositories\RentIncomesRepository;
+
 use App\Repositories\ExpensesRepository;
 
 use App\Repositories\GuestsRepository;
@@ -30,6 +32,8 @@ use App\ElectricityBill;
 
 use TextLocalHelper;
 
+use Helper;
+
 class AjaxController extends Controller
 {
 		/**
@@ -41,6 +45,7 @@ class AjaxController extends Controller
     protected $incomes;
     protected $rent_repo;
     protected $income_repo;
+    protected $rent_income_repo;
     protected $expense_repo;
     protected $room_repo;
     protected $guest_repo;
@@ -56,6 +61,7 @@ class AjaxController extends Controller
         $this->rent_repo = new RentsRepository();
         $this->room_repo = new RoomsRepository();
         $this->income_repo = new IncomesRepository();
+        $this->rent_income_repo = new RentIncomesRepository();
         $this->expense_repo = new ExpensesRepository();
         $this->bill_repo = new ElectricityBillRepository();
         $this->guest_repo = new GuestsRepository();
@@ -191,7 +197,7 @@ class AjaxController extends Controller
             $valid = $this->rents->keyValidate($data, $key);
             if($valid) {
                $result = $this->rents->updateByKey($post_params);
-                $result['pending'] = (int) $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year']);
+                $result['pending'] = $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year']);
                 $result['result'] = $this->rent_repo->getPendingAmountUsingRentId($post_params['rent_id'], $post_params['month'], $post_params['year']);
                return response()->json($result);
             } else {
@@ -481,12 +487,17 @@ class AjaxController extends Controller
       $post_params = $request->all();
       $start_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['start_date'])));
       $end_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['end_date'])));
+      $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+			if (!$report_options['admin_role']) {
+				$start_date = $report_options['start_date'];
+				$end_date = $report_options['end_date'];
+			}
 
       $monthly_income_report = $this->income_repo->getIncomesReportBetweenDates($start_date, $end_date);
 
       $total_amount = $this->income_repo->getTotalIncomesByDates($start_date, $end_date);
 
-      return response()->json([ 'monthly_report' => $monthly_income_report, 'total_amount' => $total_amount->amount ]);
+      return response()->json([ 'monthly_report' => $monthly_income_report, 'total_amount' => $total_amount->amount, "start_date" => date('d/m/Y', strtotime($start_date)), "end_date" => date('d/m/Y', strtotime($end_date)) ]);
 
     }
 
@@ -567,12 +578,17 @@ class AjaxController extends Controller
       $post_params = $request->all();
       $start_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['start_date'])));
       $end_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['end_date'])));
+      $report_options = Helper::checkRoleAndGetDate($start_date, $end_date);
+			if (!$report_options['admin_role']) {
+				$start_date = $report_options['start_date'];
+				$end_date = $report_options['end_date'];
+			}
 
       $monthly_expense_report = $this->expense_repo->getExpensesReportBetweenDates($start_date, $end_date);
 
       $total_amount = $this->expense_repo->getTotalExpensesByDates($start_date, $end_date);
 
-      return response()->json([ 'monthly_report' => $monthly_expense_report, 'total_amount' => $total_amount->amount ]);
+      return response()->json([ 'monthly_report' => $monthly_expense_report, 'total_amount' => $total_amount->amount, "start_date" => date('d/m/Y', strtotime($start_date)), "end_date" => date('d/m/Y', strtotime($end_date)) ]);
 
     }
 
@@ -854,7 +870,7 @@ class AjaxController extends Controller
             ["messages" => 
               [ 
                 [ "text" => "Your payment amount of &#8377;&nbsp;$amount received successfully!.".($pending_amount > 0 ? " Your pending amount is &#8377;&nbsp;$pending_amount" : ""), 'number' => $user_details->mobile_no ],
-                [ "text" => "You have recieved the new rent amount of &#8377;&nbsp;$amount from $user_details->name for room no $user_details->room_no".($pending_amount > 0 ? " His pending amount is &#8377;&nbsp;$pending_amount" : ""), 'number' => $this->setting['admin_mobile_no'] ]
+                //[ "text" => "You have recieved the new rent amount of &#8377;&nbsp;$amount from $user_details->name for room no $user_details->room_no".($pending_amount > 0 ? " His pending amount is &#8377;&nbsp;$pending_amount" : ""), 'number' => $this->setting['admin_mobile_no'] ]
               ]
             ];
           $messages['test'] = true;
@@ -892,13 +908,16 @@ class AjaxController extends Controller
     {
 
         $post_params = $request->all();
-
         $ids = $post_params['ids'];
-        
-        $result = $this->rents->removeRentsByIds($ids);
-
-        return response()->json([ 'success' => true, "msg" => "Rent removed successfully" ]);
-        
+        $rent_incomes = $this->rent_income_repo->checkRentIncomeExists($ids);
+        if ($rent_incomes['exists']) {
+        	$errors['error'] = [ "msg" => "Some of the rent already created", "data" => $rent_incomes ];
+	        $errors['status'] = 400;
+	        return response()->json($errors, 400);
+        } else {
+        	$result = $this->rents->removeRentsByIds($ids);
+        	return response()->json([ 'success' => true, "msg" => "Rent removed successfully" ]);	
+        }
     }
     /**
      * Get all guests.
@@ -926,7 +945,6 @@ class AjaxController extends Controller
     */
     public function getGuestIncomeBetweenDate (Request $request)
     {
-
       $post_params = $request->all();
       $start_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['start_date'])));
       $end_date = date('Y-m-d', strtotime(str_replace('/', '-', $post_params['end_date'])));
@@ -935,7 +953,7 @@ class AjaxController extends Controller
       $monthly_guest_income_report = $this->income_repo->getGuestIncomesReportBetweenDates($start_date, $end_date, $guest_id);
       $total_amount = $this->income_repo->getTotalGuestIncomeByDates($start_date, $end_date, $guest_id);
 
-      return response()->json([ 'monthly_report' => $monthly_guest_income_report, 'total_amount' => $total_amount ]);
+      return response()->json([ 'monthly_report' => $monthly_guest_income_report, 'total_amount' => $total_amount, "start_date" => date('d/m/Y', strtotime($start_date)), "end_date" => date('d/m/Y', strtotime($end_date)) ]);
     }
     /**
      * Get advance and income details for guest
@@ -947,7 +965,8 @@ class AjaxController extends Controller
     {
       $guest_income = $this->income_repo->getTotalGuestIncomeUsingRentId($rent_id);
       $check_incharge = $this->rent_repo->checkInchargeAndGetDetails($rent_id);
-      return response()->json([ 'guest_income' => $guest_income, 'check_incharge' => $check_incharge ]);
+      $rent_details = $this->rent_repo->getUserDetailsUsingRent($rent_id);
+      return response()->json([ 'guest_income' => $guest_income, 'check_incharge' => $check_incharge, 'rent_details' => $rent_details ]);
     }
 
     /**
@@ -969,5 +988,54 @@ class AjaxController extends Controller
          return response()->json($errors, 400);
       }
       
+    }
+    /**
+     * Get settlement amount.
+     *
+     * @param  NULL
+     * @return Response
+    */
+    public function calculateSettlement (Request $request)
+    {
+    	$post_params = $request->all();
+    	$valid = $this->rents->checkoutDateValidate($post_params);
+      if($valid) {
+        $amount = $this->rent_repo->getSettlementAmount($post_params);
+        return response()->json([ 'success' => true, "amount" => $amount ]);
+      } else {
+         $errors['error'] = $this->rents->errors();
+         $errors['status'] = 400;
+         return response()->json($errors, 400);
+      }
+    }
+
+    /**
+     * Update the electricity bill to rent
+     *
+     * @param  NULL
+     * @return Response
+    */
+    public function updateElectricityBillToRent (Request $request)
+    {
+    	$post_params = $request->all();
+      $result = $this->rents->updateElectricityBillToRent($post_params);
+      return [ "success" => true, "msg" => "The electricity bills updated successfully to all rents" ];
+    }
+
+    /**
+     * Monthly rent report.
+     *
+     * @param  NULL
+     * @return Response
+    */
+    public function getSettledGuestDetailsForRoom (Request $request)
+    {
+
+        $post_params = $request->all();
+
+        $result = $this->rent_repo->getSettledGuestDetailsForRoom($post_params)->toArray();
+
+        return response()->json([ 'guests' => $result ]);
+        
     }
 }

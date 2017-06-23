@@ -105,6 +105,8 @@ class Incomes extends Model
 				$id = $data['id'];
 				unset($data['id']);
 				\Session::flash('message', trans('message.income_update_success'));
+				if (isset($data['date_of_income']))
+					$data['date_of_income'] = date('Y-m-d', strtotime(str_replace("/", "-", $data['date_of_income'])));
 				$this->where('id', $id)->update($data);
 				$last_id = $id;
 			} else {

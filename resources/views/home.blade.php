@@ -9,6 +9,7 @@
 @endsection
 @section('main-content')
 	
+	
   <div class="col-md-6 col-lg-3">
     <div class="widget-bg-color-icon card-box fadeInDown animated">
       <!--<div class="bg-icon bg-icon-info pull-left">
@@ -61,6 +62,7 @@
       <div class="clearfix"></div>
     </div>
   </div>
+  @if($roles->role_name == 'admin')
   <div class="col-md-6 col-lg-3">
     <div class="widget-bg-color-icon card-box fadeInDown animated">
       <!--<div class="bg-icon bg-icon-info pull-left">
@@ -113,6 +115,7 @@
       <div class="clearfix"></div>
     </div>
   </div>
+  @endif
 
 <div class="row">
   <div class="col-lg-12">

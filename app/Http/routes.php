@@ -78,6 +78,7 @@ Route::group(['prefix' => 'rents'], function () {
 	Route::get('/{room_id}/room-destroy', 'RentsController@destroyByRoom');
 	Route::get('/list-update', 'RentsController@listUpdate');
 	Route::get('/settlement', 'RentsController@settlement');
+	Route::get('/settled-rent', 'RentsController@settledRents');
 });
 
 Route::group(['prefix' => 'reports'], function () {
@@ -94,6 +95,12 @@ Route::group(['prefix' => 'message'], function () {
 });
 
 Route::resource('rents', 'RentsController');
+
+Route::resource('notes', 'NotesController');
+
+Route::group(['prefix' => 'notes'], function () {
+	Route::get('/{id}/destroy', 'NotesController@destroy');
+});
 
 Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/create-new-bill', 'AjaxController@createNewBill');
@@ -133,4 +140,7 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/get-guest-income', 'AjaxController@getGuestIncomeBetweenDate');
 	Route::get('/{guest_id}/get-guest-details', 'AjaxController@getGuestDetails');
 	Route::post('/update-settlement', 'AjaxController@updateSettlement');
+	Route::post('/get-settlement-amount', 'AjaxController@calculateSettlement');
+	Route::post('/update-electricity-rent', 'AjaxController@updateElectricityBillToRent');
+	Route::post('/get-settled-guest-details-for-room', 'AjaxController@getSettledGuestDetailsForRoom');
 });

@@ -60,6 +60,8 @@ class Expenses extends Model
 				$id = $data['id'];
 				unset($data['id']);
 				\Session::flash('message', trans('message.expense_update_success'));
+				if (isset($data['date_of_expense']))
+					$data['date_of_expense'] = date('Y-m-d', strtotime(str_replace("/", "-", $data['date_of_expense'])));
 				$this->where('id', $id)->update($data);
 				$last_id = $id;
 			} else {

@@ -49,7 +49,7 @@ class ElectricityBill extends Model
     public function updateByKey ($data)
     {
 
-        $form_data = [];
+        $form_data = [ "is_updated" => 1 ];
         $key = $data['column_key'];
         $setting_repo = new SettingsRepository();
         $setting = $setting_repo->all()->lists('setting_value', 'setting_key')->toArray();

@@ -10,18 +10,17 @@
 
 @section('main-content')
 	
-
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-primary">
-					<div class="panel-heading">{{trans('message.guest_income_report_between_date')}} 
+					<div class="panel-heading">{{trans('message.guest_income_report_between_date')}} from <span id="jsReportDateSpan"><?php echo date('d/m/Y', strtotime($start_date)).' to '.date('d/m/Y', strtotime($end_date)); ?>
 						<span class="pull-right">
 							<span class="pad-right-15">Total rent:&nbsp;&#8377;&nbsp;{{$guest_income['rent']}}</span>
 							<span class="pad-right-15">Paid rent:&nbsp;&#8377;&nbsp;{{$guest_income['incomes']}}</span>
 							<span class="pad-right-15">Balance:&nbsp;&#8377;&nbsp;{{$guest_income['balance']}}</span>
 					</span>
 					</div>
-					<div class="panel-body no-pad-top">
+					<div class="panel-body no-pad-top" id="jsReportPanel">
 						<!-- will be used to show any messages -->
 						<div class="row text-center">
 					    <div class="col-sm-12">
@@ -100,11 +99,11 @@
 	
 	<script type="text/javascript">
 	var reportTable = null;
+	var max_min_range = false;
 	var start_date = '<?php echo $start_date; ?>';
 	var end_date = '<?php echo $end_date; ?>';
 	var repot_between_date = ajax_url.get_guest_income_report_between_date;
 	var custom_form_data = { guest_id : "{{$guest_id}}" };
-	console.log(custom_form_data)
 	var columns_defs = {
 			"columnDefs": [
 		    {

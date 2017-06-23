@@ -24,6 +24,7 @@ class SettingsController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('permission');
 		$this->settings = new Settings();
         $this->setting_repo = new SettingsRepository();
 

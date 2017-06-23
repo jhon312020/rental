@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Expenses;
 
+use Helper;
 
 class ExpensesRepository
 {
@@ -69,8 +70,11 @@ class ExpensesRepository
 	 */
 	public function allActive()
 	{
-		return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type')
+		return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type', 'guests.name as guest', 'rooms.room_no')
 					->leftjoin('users', 'users.id', '=', 'expenses.user_id')
+					->leftjoin('rents', 'expenses.rent_id', '=', 'rents.id')
+					->leftjoin('rooms', 'rents.room_id', '=', 'rooms.id')
+					->leftjoin('guests', 'rents.guest_id', '=', 'guests.id')
 					->leftjoin('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
 					->where(array('expenses.is_active' => 1))
 					->get();
@@ -98,8 +102,11 @@ class ExpensesRepository
 	 */
 	public function getExpensesReportBetweenDates ($start_date, $end_date)
 	{
-		return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type')
+		return Expenses::select('expenses.id', 'expenses.amount', 'expenses.expense_type as expense_type_id', 'expenses.user_id', 'expenses.date_of_expense', 'expenses.notes', 'users.name as entry_by', 'expense_types.type_of_expense as expense_type', 'guests.name as guest', 'rooms.room_no')
 					->leftjoin('users', 'users.id', '=', 'expenses.user_id')
+					->leftjoin('rents', 'expenses.rent_id', '=', 'rents.id')
+					->leftjoin('rooms', 'rents.room_id', '=', 'rooms.id')
+					->leftjoin('guests', 'rents.guest_id', '=', 'guests.id')
 					->leftjoin('expense_types', 'expense_types.id', '=', 'expenses.expense_type')
 					->where(array('expenses.is_active' => 1))
 					->whereRaw('DATE(tbl_expenses.date_of_expense) >= ? AND DATE(tbl_expenses.date_of_expense) <= ? ', [$start_date, $end_date])

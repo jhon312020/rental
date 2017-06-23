@@ -5,7 +5,10 @@ var loadAndSave = {
 			inputs - [Object]
 	* @return Data [JSON]
 	*/
-	save: function(inputs, url) {
+	save: function(inputs, url, overlay_id = null) {
+		if (overlay_id) {
+			commonFunctions.showOverlay(overlay_id);
+		}
 		var data = inputs;
 		var deferred = $.Deferred();
 		$.ajax({
@@ -14,12 +17,15 @@ var loadAndSave = {
 			data:inputs,
 			dataType:'json',
 			success:function(data, textStatus, jqXHR) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.resolve(data);
-				console.log(data)
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
-				//deferred.reject({success:false});
-				//console.log(textStatus+'----'+errorThrown);
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.reject(jqXHR.responseJSON);
 			}
 		});
@@ -31,7 +37,10 @@ var loadAndSave = {
 			inputs - [Object]
 	* @return Data [JSON]
 	*/
-	post: function(inputs, url) {
+	post: function(inputs, url, overlay_id = null) {
+		if (overlay_id) {
+			commonFunctions.showOverlay(overlay_id);
+		}
 		var data = inputs;
 		var deferred = $.Deferred();
 		$.ajax({
@@ -40,12 +49,16 @@ var loadAndSave = {
 			data:inputs,
 			dataType:'json',
 			success:function(data, textStatus, jqXHR) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.resolve(data);
-				console.log(data)
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.reject(jqXHR.responseJSON);
-				console.log(textStatus+'----'+errorThrown);
 			}
 		});
 		return deferred.promise();
@@ -56,7 +69,10 @@ var loadAndSave = {
 			inputs - [Object]
 	* @return Data [JSON]
 	*/
-	get: function(inputs, url) {
+	get: function(inputs, url, overlay_id = null) {
+		if (overlay_id) {
+			commonFunctions.showOverlay(overlay_id);
+		}
 		var data = inputs;
 		var deferred = $.Deferred();
 		$.ajax({
@@ -65,12 +81,16 @@ var loadAndSave = {
 			data:inputs,
 			dataType:'json',
 			success:function(data, textStatus, jqXHR) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.resolve(data);
-				console.log(data)
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.reject({success:false});
-				console.log(textStatus+'----'+errorThrown);
 			}
 		});
 		return deferred.promise();
@@ -81,7 +101,10 @@ var loadAndSave = {
 			inputs - [Object]
 	* @return Data [JSON]
 	*/
-	deleteRecord: function(inputs, url) {
+	deleteRecord: function(inputs, url, overlay_id = null) {
+		if (overlay_id) {
+			commonFunctions.showOverlay(overlay_id);
+		}
 		var data = inputs;
 		var deferred = $.Deferred();
 		$.ajax({
@@ -90,12 +113,16 @@ var loadAndSave = {
 			data:inputs,
 			dataType:'json',
 			success:function(data, textStatus, jqXHR) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.resolve(data);
-				console.log(data)
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
+				if (overlay_id) {
+					commonFunctions.hideOverlay(overlay_id);
+				}
 				deferred.reject({success:false});
-				console.log(textStatus+'----'+errorThrown);
 			}
 		});
 		return deferred.promise();
@@ -121,7 +148,6 @@ var loadAndSave = {
 			},
 			error:function(jqXHR, textStatus, errorThrown) {
 				deferred.reject({success:false});
-				console.log(textStatus+'----'+errorThrown);
 			}
 		});
 		return deferred.promise();

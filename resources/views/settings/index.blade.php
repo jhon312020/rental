@@ -16,6 +16,11 @@
 					<div class="panel-body">
 						<!-- will be used to show any messages -->
 						@include('layouts.common.messages')
+						<div class="row min-height">
+							<div class="col-sm-12" height="60px">
+								<a href="{{ URL::to('users/change-password') }}" class="btn btn-primary pull-right">{{trans('message.change_password')}}</a>
+							</div>
+						</div>
 						{{ Form::open($setting) }}
 							<?php
 								$i = 0;

@@ -22,7 +22,8 @@ class ExpenseTypesController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-		$this->expense_types = new ExpenseTypes();
+        $this->middleware('permission');
+				$this->expense_types = new ExpenseTypes();
         $this->expense_types_repo = new ExpenseTypesRepository();
 
         //\View::share('page_name_active', trans('message.expense_types'));

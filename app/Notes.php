@@ -4,24 +4,15 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Contracts\Validation\Validator;
-use DB;
-use Auth;
-
-class Guests extends Model
+class Notes extends Model
 {
-		private $post = [];
+    private $post = [];
     private $rules = 
 			[
-				"name" => 'required',
-				"email" => 'email|unique:guests,email',
-				"mobile_no" => 'required|digits:10|unique:guests,mobile_no',
-				"city" => 'required',
-				"state" => 'required',
-				"country" => 'required',
-				"address" => 'required',
-				"zip" => 'required|numeric',
+				"notes" => 'required',
+				"date_of_notes" => 'date_format:d/m/Y',
 			];
+
 	/**
    * Validation all necessary fields.
    *
@@ -30,13 +21,6 @@ class Guests extends Model
   */
 	public function validate($data)
   {
-  		if(isset($data['id'])) {
-				$this->rules['email'] = $this->rules['email'].','.$data['id'].',id,is_active,1';
-				$this->rules['mobile_no'] = $this->rules['mobile_no'].','.$data['id'].',id,is_active,1';
-			} else {
-				$this->rules['email'] = $this->rules['email'].',NULL,id,is_active,1';
-				$this->rules['mobile_no'] = $this->rules['mobile_no'].',NULL,id,is_active,1';
-			}
 	    // make a new validator object
 			$v = \Validator::make($data, $this->rules);
 		
@@ -72,14 +56,32 @@ class Guests extends Model
 			if(isset($data['id'])) {
 				$id = $data['id'];
 				unset($data['id']);
-				\Session::flash('message', trans('message.guests_update_success'));
+				\Session::flash('message', trans('message.notes_update_success'));
+				if (isset($data['date_of_notes']))
+					$data['date_of_notes'] = date('Y-m-d', strtotime(str_replace("/", "-", $data['date_of_notes'])));
 				$this->where('id', $id)->update($data);
 				$last_id = $id;
 			} else {
-				$this->insert($data);
-				\Session::flash('message', trans('message.guests_create_success'));
+				foreach ($data as $key => $value) {
+					$this->{$key} = $value;
+				}
+				$this->save();
+				\Session::flash('message', trans('message.notes_create_success'));
 				$last_id = $this->id;
 			}
 			return $last_id;
 		}
+
+		/**
+     * Always format the date while the date of income when we retrieve it
+     */
+    public function getDateOfNotesAttribute($value) {
+        return date('d/m/Y', strtotime($value));
+    }
+    /**
+     * Always format the date while the date of expense date when we insert it
+     */
+    public function setDateOfNotesAttribute($value) {
+    	$this->attributes['date_of_notes'] = $value ? date('Y-m-d', strtotime(str_replace('/', '-', $value))) : null;
+    }
 }

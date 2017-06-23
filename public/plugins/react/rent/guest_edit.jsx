@@ -252,7 +252,7 @@ class Grid extends React.Component {
 							<div className="react-grid-Cell__value">
 								<span>
 									<div className="react-grid-checkbox-container">
-										<input className="react-grid-checkbox" defaultChecked={tr['selected_' + trIndex]} onChange={this.selectRow.bind(this)} type="checkbox" name={"checkbox" + trIndex + key} />
+										{typeof tr['is_remove'] == 'undefined' || (typeof tr['is_remove'] != 'undefined' && tr['is_remove']) ? <input className="react-grid-checkbox" defaultChecked={tr['selected']} onChange={this.selectRow.bind(this)} type="checkbox" name={"checkbox" + trIndex + key} /> : ''}
 										<label htmlFor={"checkbox" + trIndex + key} className="react-grid-checkbox-label"></label>
 
 										{tr['rent_id'] && <input type="hidden" name={"guest[" + trIndex + "][rent_id]"} value={tr['rent_id']} /> }
@@ -282,7 +282,7 @@ class Grid extends React.Component {
 					      	
 					         <span>
 					            <label>
-			                  <input type="checkbox" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} checked={ tr[key] && tr.incharge_set ? true : false } onChange={this.updateIncharge.bind(this, trIndex, key)} />
+			                  <input type="checkbox" ref="checkbox" name={"guest[" + trIndex + "][" +  key + "]"} checked={ tr[key] && tr.incharge_set ? true : false } /*onChange={this.updateIncharge.bind(this, trIndex, key)}*/ disabled />
 			                </label>
 					         </span>
 					      	
@@ -913,10 +913,23 @@ class Guest extends React.Component {
 			gridData.filter(function(arr, index) {
 				return !arr.selected;
 			});
+		var check_incharge = 
+			gridData.filter(function(arr, index) {
+				return arr.is_incharge == 1 && arr.incharge_set == 1 && arr.selected;
+			});
+		var alert_msg = 'Are you sure to delete?';
+		if (check_incharge.length) {
+			gridData.forEach(function (result, index) {
+				result['selected'] = true;
+			});
+			this.setState({ grid : gridData });
+			alert_msg = "You selected the incharge type. This will clear all the users related to incharge! Are you sure to confirm?";
+		}
+		console.log(alert_msg)
 		var ids = gridData.filter(function (arr, index) { return arr.selected }).map(function (value) { return value.id })
 		var _this = this;
-		if(gridData.length != finalGrid.length) {
-			commonFunctions.showConfirmAlert('Confirm!', 'Are you sure to delete?').then(function (data) {
+		if(ids.length) {
+			commonFunctions.showConfirmAlert('Confirm!', alert_msg).then(function (data) {
 				var form_data = { ids: ids };
 				loadAndSave.save(form_data, ajax_url.remove_rents).then(function ( data ) {
 					jqueryValidate.renderSuccessToast("Rent removed successfully");
@@ -928,7 +941,19 @@ class Guest extends React.Component {
 		    		_this.updateRowHeight();
 		    	})
 				}).fail(function ( error ) {
-					jqueryValidate.renderSuccessToast("Some problem occurs");
+						if (error.error) {
+							var errors = error.error;
+							var result_data = errors.data;
+							jqueryValidate.renderErrorToast(errors.msg);
+							gridData.forEach(function (result, index) {
+								if (result_data['is_incharge'] || (!result_data['is_incharge'] && $.inArray(result.id, result_data['rent_ids']) == -1)) {
+									result['is_remove'] = false;
+									result['selected'] = false;
+								}
+							});
+							_this.setState({ grid : gridData });
+						}
+						//jqueryValidate.renderSuccessToast("Some problem occurs");
 				})
 			})
 		}
@@ -1005,12 +1030,11 @@ class Guest extends React.Component {
 				<div className="col-sm-12 text-center" style={{ fontSize : "25px" }}>
 					<span>Room no :</span>&nbsp;&nbsp;&nbsp;
 					<span>{ room.room_no }</span>
-					
 				</div>
 			</div>
 			<div className="row row-buttons" style={{ top : "51px" }}>
 				<div className="col-sm-12">
-					<button type="button" className="btn btn-primary" onClick={this.addNew.bind(this)}><i className="fa fa-plus"></i> Add</button>
+					{/*<button type="button" className="btn btn-primary" onClick={this.addNew.bind(this)}><i className="fa fa-plus"></i> Add</button>*/}
 					<button type="button" className="btn btn-primary btn-margin" onClick={this.removeItem.bind(this)}><i className="fa fa-remove"></i> Remove</button>
 					<form style={{ display : "inline" }}>
 					<input type="hidden" name="guest_ids" />
@@ -1020,7 +1044,7 @@ class Guest extends React.Component {
 						<option value="email">Email</option>
 						<option value="mobile_no">Mobile no</option>
 					</select>
-					<input type="text" className="form-control" ref="searchInput" name="column_value" style={{ width : "200px", position : "absolute", display : "inline", left : "375px" }} />
+					<input type="text" className="form-control" ref="searchInput" name="column_value" style={{ width : "200px", position : "absolute", display : "inline", left : "315px" }} />
 					</form>
 					<ul id="slide-out" className="side-nav" style={{ width : "0px" }}>
 				    <li><div className="userView">
