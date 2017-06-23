@@ -662,5 +662,15 @@ $(document).ready(function() {
     rootSelector: '[data-toggle=confirmation]',
     container: 'body'
   });
+
+
+	$('#settlementModal').on('show.bs.modal', function (e) {
+	  var anim = 'zoomInUp';
+	  commonFunctions.animateModal(anim, 'settlementModal');
+	})
+	$('#settlementModal').on('hide.bs.modal', function (e) {
+	  var anim = 'zoomOutUp';
+	  commonFunctions.animateModal(anim, 'settlementModal');
+	})
   
 });
