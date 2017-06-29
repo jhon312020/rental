@@ -100,7 +100,7 @@ var commonFunctions = {
 		$('#rent').text(total_rent_amount);
 		$('#balance').text(pending_balance);
 	},
-	animateModal (animation, modal_id) {
-		$('#' + modal_id + ' .modal-dialog').attr('class', 'modal-dialog  ' + animation + '  animated');
+	animateModal (animation, modal_id, modal_length) {
+		$('#' + modal_id + ' .modal-dialog').attr('class', 'modal-dialog  '+ modal_length + ' ' + animation + '  animated');
 	}
 };

@@ -13,6 +13,7 @@
 $(document).ready(function() {
 	var advance_amount = 0;
 	var current_settle_details = null;
+	var $tr;
 	var buttonCommon = 
 		{
       exportOptions: {
@@ -398,13 +399,43 @@ $(document).ready(function() {
 				
 			}
 		});
-	})
+	});
+
+	$(document).on('click', '.jsOldRents', function () {
+		var ele = $(this);
+		$tr = ele.closest('tr');
+		var old_rent = $table.row($tr).data();
+		jqueryValidate.resetForm('oldRentModal');
+		var $modal = $('#oldRentModal');
+		$modal.find('[name="old_rent_amount"]').val(old_rent[2]);
+		$modal.modal('show');
+	});
+
+	$(document).on('click', '.jsOldRentSubmit', function () {
+		var ele = $(this);
+		var $modal = $('#oldRentModal');
+		var amount = $modal.find('[name="old_rent_amount"]').val();
+		var form_data = { rent_id : $tr.find('.jsOldRents').data('id'), old_rent_amount : amount };
+		loadAndSave.save(form_data, ajax_url.save_old_rent, 'jsOldRentPanel').then(function (data) {
+			if (data.success) {
+				$modal.modal('hide');
+				var $cell = $table.cell($tr.find('td:nth-child(3)'));
+				$cell.data(amount).draw();
+				jqueryValidate.renderSuccessToast(data.msg);
+			}
+		}).fail(function ( error ) {
+			if(error.error) {
+				$.each(error.error, function (key, err) {
+					jqueryValidate.insertError(key, err[0]);
+				});
+			}
+		});
+	});
 	
 	$(document).on('click', '.jsSettlement', function () {
 		var ele = $(this);
-
 		rent_id = ele.data('id');
-		advance = ele.closest('tr').find('td:nth-child(3)').text();
+		advance = ele.closest('tr').find('td:nth-child(4)').text();
 		var url = ajax_url.get_guest_details.replace("guest_id", rent_id);
 		loadAndSave.get([], url, 'jsSettlmentPanel').then(function (data) {
 			$.each(data.guest_income, function (key, value) {
@@ -441,7 +472,7 @@ $(document).ready(function() {
 	$(document).on('click', '.jsSettlementSubmit', function () {
 		var form_data = $('#settle_form').serializeArray();
 		form_data.push({name: "id", value: rent_id });
-		loadAndSave.post(form_data, ajax_url.update_settlement).then(function (data) {
+		loadAndSave.post(form_data, ajax_url.update_settlement, 'jsSettlmentFormPanel').then(function (data) {
 			table_row.remove().draw();
 			if (data.msg) {
 				$('#settlementModal').modal('hide');
@@ -454,7 +485,7 @@ $(document).ready(function() {
 				$.each(error.error, function (key, err) {
 					console.log(key, err)
 					jqueryValidate.insertError(key, err[0]);
-				})
+				});
 			}
 		});
 	});
@@ -637,7 +668,7 @@ $(document).ready(function() {
 		current_settle_details = null;
 		var form_data = { rent_id : rent_id, checkout_date : $('#checkout_date').val() };
 		var url = ajax_url.get_settlement;
-		loadAndSave.post(form_data, url, 'jsSettlmentPanel').then(function (data) {
+		loadAndSave.post(form_data, url, 'jsSettlmentFormPanel').then(function (data) {
 			current_settle_details = data.amount;
 			commonFunctions.updateSettlement(current_settle_details, advance_amount, false);
 		}).fail(function ( error ) {
@@ -666,11 +697,20 @@ $(document).ready(function() {
 
 	$('#settlementModal').on('show.bs.modal', function (e) {
 	  var anim = 'zoomInUp';
-	  commonFunctions.animateModal(anim, 'settlementModal');
-	})
+	  commonFunctions.animateModal(anim, 'settlementModal', 'modal-md');
+	});
 	$('#settlementModal').on('hide.bs.modal', function (e) {
-	  var anim = 'zoomOutUp';
-	  commonFunctions.animateModal(anim, 'settlementModal');
-	})
+	  /*var anim = 'zoomOutUp';
+	  commonFunctions.animateModal(anim, 'settlementModal', 'modal-md');*/
+	});
+
+	$('#oldRentModal').on('show.bs.modal', function (e) {
+	  var anim = 'bounceInUp';
+	  commonFunctions.animateModal(anim, 'oldRentModal', 'modal-sm');
+	});
+	$('#oldRentModal').on('hide.bs.modal', function (e) {
+	  var anim = 'bounceOutUp';
+	  commonFunctions.animateModal(anim, 'oldRentModal', 'modal-sm');
+	});
   
 });

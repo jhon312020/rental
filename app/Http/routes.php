@@ -143,4 +143,5 @@ Route::group(['prefix' => 'ajax'], function () {
 	Route::post('/get-settlement-amount', 'AjaxController@calculateSettlement');
 	Route::post('/update-electricity-rent', 'AjaxController@updateElectricityBillToRent');
 	Route::post('/get-settled-guest-details-for-room', 'AjaxController@getSettledGuestDetailsForRoom');
+	Route::post('/save-old-rent', 'AjaxController@saveOldRent');
 });

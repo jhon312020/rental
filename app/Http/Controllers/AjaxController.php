@@ -22,6 +22,8 @@ use App\Repositories\ElectricityBillRepository;
 
 use App\Rents;
 
+use App\RentIncomes;
+
 use App\IncomeTypes;
 
 use App\ExpenseTypes;
@@ -42,6 +44,7 @@ class AjaxController extends Controller
      * @return void
      */
     protected $rents;
+    protected $rent_incomes;
     protected $incomes;
     protected $rent_repo;
     protected $income_repo;
@@ -56,6 +59,7 @@ class AjaxController extends Controller
         parent::__construct();
         $this->middleware('auth');
         $this->rents = new Rents();
+        $this->rent_incomes = new RentIncomes();
         $this->incomes = new Incomes();
         $this->bills = new ElectricityBill();
         $this->rent_repo = new RentsRepository();
@@ -1037,5 +1041,30 @@ class AjaxController extends Controller
 
         return response()->json([ 'guests' => $result ]);
         
+    }
+
+    /**
+     * Monthly rent report.
+     *
+     * @param  NULL
+     * @return Response
+    */
+    public function saveOldRent (Request $request)
+    {
+      $post_params = $request->all();
+      $rent_id = $post_params['rent_id'];
+      $rent_incomes = $this->rent_income_repo->findByOldRent($rent_id);
+      if (isset($rent_incomes->id)) {
+      	$post_params['rent_income_id'] = $rent_incomes->id;
+      }
+      $valid = $this->rent_incomes->oldRentValidate($post_params);
+      if($valid) {
+        $this->rent_incomes->updateOldRent($post_params);
+        return response()->json([ 'success' => true, "msg" => "Old rent updated successfully!" ]);
+      } else {
+         $errors['error'] = $this->rent_incomes->errors();
+         $errors['status'] = 400;
+         return response()->json($errors, 400);
+      }
     }
 }

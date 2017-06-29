@@ -310,9 +310,9 @@ class Rents extends Model
 
 					return [ "valid" => true ];
 
-				} else if(strtotime($checkout_date) < strtotime($checkin_date)) {
+				} else if(strtotime($checkout_date) <= strtotime($checkin_date)) {
 
-					return [ "valid" => false, "msg" => "Checkout date should between ".date('01/m/Y', strtotime($rent_date)).' and '.date('d/m/Y') ];
+					return [ "valid" => false, "msg" => "Checkout date should between ".date('d/m/Y', strtotime($checkin_date)).' and '.date('d/m/Y') ];
 
 				} else {
 

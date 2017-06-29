@@ -37,6 +37,7 @@ return array(
     */
     'ADVANCE' => 1,
     'RENT' => 2,
+    'OLD_RENT' => 3,
     'SETTLEMENT' => 1,
     'INCOME_EDIT' => ['1'],
     'EXPENSE_EDIT' => ['1'],

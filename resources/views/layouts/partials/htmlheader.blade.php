@@ -140,6 +140,7 @@
               get_settlement : "{{action('AjaxController@calculateSettlement')}}",
               update_electricity_rent : "{{action('AjaxController@updateElectricityBillToRent')}}",
               get_settle_rent : "{{action('AjaxController@getSettledGuestDetailsForRoom')}}",
+              save_old_rent : "{{action('AjaxController@saveOldRent')}}",
           };
     </script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

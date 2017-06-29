@@ -326,6 +326,10 @@ return [
 		'date_of_notes' => 'Date of notes',
 		/* Notes label end */
 
+		/* Settlement label start */
+		'old_rent' => 'Old rent',
+		/* Settlement label end */
+
 	/* label name end */
 
 

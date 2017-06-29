@@ -758,12 +758,16 @@ class RentsRepository
 	 * @return \Illuminate\Database\Eloquent\Collection|\App\Rents[]
 	 */
 	public function getAllActiveRents () {
-	  return Rents::select('guests.mobile_no', 'rents.id', 'guests.name', 'rooms.room_no', 'rents.checkin_date', 'incomes.amount as advance', 'rents.is_incharge', 'rents.incharge_set')
+	  return Rents::select('guests.mobile_no', 'rents.id', 'guests.name', 'rooms.room_no', 'rents.checkin_date', 'incomes.amount as advance', 'rents.is_incharge', 'rents.incharge_set', 'rent_incomes.amount as old_rent')
 				  ->leftjoin('guests', 'guests.id', '=', 'rents.guest_id')
 				  ->leftjoin('rooms', 'rooms.id', '=', 'rents.room_id')
 				  ->leftjoin('incomes', function ($join) {
 						$join->on('incomes.rent_id', '=', 'rents.id')
 							->on('incomes.income_type', '=', \DB::raw(\Config::get('constants.ADVANCE')));
+				  })
+				  ->leftjoin('rent_incomes', function ($join) {
+						$join->on('rent_incomes.rent_id', '=', 'rents.id')
+							->on('rent_incomes.income_type', '=', \DB::raw(\Config::get('constants.OLD_RENT')));
 				  })
 				  ->where([ 'rents.is_active' => 1, 'rents.checkout_date' => null ])
 				  ->where(function ($query) {

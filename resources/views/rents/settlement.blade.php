@@ -29,6 +29,7 @@
 											<tr>
 												<td>{{trans('message.name')}}</td>
 												<td>{{trans('message.room_no')}}</td>
+												<td>{{trans('message.old_rent')}}</td>
 												<td>{{trans('message.advance')}}</td>
 												<td>{{trans('message.checkin_date')}}</td>
 												<td>{{trans('message.mobile_no')}}</td>
@@ -40,6 +41,7 @@
 												<tr>
 													<td>{{ $value->name }}</td>
 													<td>{{ $value->room_no }}</td>
+													<td>{{ $value->old_rent }}</td>
 													<td>{{ $value->advance }}</td>
 													<td>{{ $value->checkin_date	 }}</td>
 													<td>{{ $value->mobile_no }}</td>
@@ -53,6 +55,9 @@
 													<!--<a class="btn btn-small btn-success" href="{{ URL::to('guests/' . $value->id) }}">Show this Nerd</a>-->
 													<a href="javascript:;" class="btn btn-info btn-sm jsSettlement" data-id="{{$value->id}}">
 														<span class="glyphicon glyphicon-briefcase" data-toggle="tooltip" title="Settlement"></span>
+													</a>
+													<a href="javascript:;" class="btn btn-info btn-sm jsOldRents" data-id="{{$value->id}}">
+														<span class="glyphicon glyphicon-book" data-toggle="tooltip" title="Old rents"></span>
 													</a>
 													<a href="{{ URL::to('rents/' . $value->id . '/edit') }}" class="btn btn-info btn-sm">
 														<span class="glyphicon glyphicon-edit"></span>
@@ -75,6 +80,38 @@
 		</div>
 
 		<!-- Modal -->
+		<div class="modal fade" id="oldRentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog zoomInUp animated modal-sm" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">{{trans('message.old_rent')}}</h4>
+		      </div>
+		      <div class="modal-body" id="jsOldRentPanel">
+		      	<div class="row">
+		      		<div class="col-sm-12">
+			      		<div class="form-group">
+				      		<div class="row form-top">
+			              <div class="col-sm-12">
+			              	<label>Old rent amount</label>
+			              	<input type="text" name="old_rent_amount" id="old_rent_amount" class="form-control" />
+			              </div>
+			            </div>
+			          </div>
+			        </div>
+		      	</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-primary jsOldRentSubmit">Save changes</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+
+
+
 		<div class="modal fade" id="settlementModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 		  <div class="modal-dialog zoomInUp animated modal-md" role="document">
 		    <div class="modal-content">
@@ -82,7 +119,7 @@
 		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 		        <h4 class="modal-title" id="myModalLabel">{{trans('message.settlement')}}</h4>
 		      </div>
-		      <div class="modal-body" id="jsSettlmentPanel">
+		      <div class="modal-body" id="jsSettlmentFormPanel">
 		      	<div class="row">
       			<div class="col-sm-6 pad-15" style="background:#f3b44c;">
 		    			<span>Advance:&nbsp;₹&nbsp;<span id="advance">0</span></span>

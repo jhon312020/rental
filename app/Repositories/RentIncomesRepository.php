@@ -176,4 +176,18 @@ class RentIncomesRepository
 
 			return [ "exists" => false ];
     }
+
+    /**
+     * Get data using old rent
+     *
+     * @param  array  $mobile_nos
+     * @return bool|null
+     * @throws \Exception
+     */
+    public function findByOldRent ($rent_id)
+    {
+        return RentIncomes::select('*')
+                  ->where([ 'rent_incomes.rent_id' => $rent_id, 'rent_incomes.income_type' => \DB::raw(\Config::get('constants.OLD_RENT')) ])
+                  ->first();
+    }   
 }
